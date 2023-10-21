@@ -38,6 +38,12 @@
             android:layout_height="wrap_content" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <Button
         android:id="@+id/signInButton"
         android:text="@string/sign_in"
@@ -48,7 +54,7 @@
 
     <TextView
         android:id="@+id/textViewDontHaveAccount"
-        android:text="@string/don_t_have_an_account"
+        android:text="@string/no_account"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textStyle="bold"
