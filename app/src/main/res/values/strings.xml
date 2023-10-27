@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">COEN390_SafeHit</string>
+    <string name="sign_up">Sign up</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign in</string>
+    <string name="no_account">No account?</string>
+    <string name="create_an_account">Create an account</string>
+</resources>
