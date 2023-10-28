@@ -1,13 +1,35 @@
 package com.example.coen390_safehit;
 
+import static android.content.ContentValues.TAG;
+
+import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Database {
+    private static Database databaseInstance = null;
+    public HashMap<String, String> playerList = new HashMap<>();
+    public HashMap<String, String> teamsList = new HashMap<>();
+
+    public static String personID;
+
+    public static synchronized Database getInstance() {
+        if (databaseInstance == null)
+            databaseInstance = new Database();
+
+        return databaseInstance;
+    }
+
     public interface AddCallback {
         void onSuccess(String documentId);
 
@@ -47,7 +69,7 @@ public class Database {
         addPerson(firstName, lastName, "Player", new AddCallback() {
             @Override
             public void onSuccess(String personID) {
-                Map<String, Object> player = new HashMap<>();
+                Map<String, String> player = new HashMap<>();
                 player.put("PID", personID);
                 player.put("Number", number);
                 player.put("Position", position);
@@ -63,7 +85,7 @@ public class Database {
     }
 
     public void addPerson(String firstName, String lastName, String type, AddCallback callback) {
-        Map<String, Object> person = new HashMap<>();
+        Map<String, String> person = new HashMap<>();
         person.put("FirstName", firstName);
         person.put("LastName", lastName);
         person.put("Type", type);
@@ -74,7 +96,7 @@ public class Database {
     }
 
     public void addTeams(String teamName, String coachID, AddCallback callback) {
-        Map<String, Object> team = new HashMap<>();
+        Map<String, String> team = new HashMap<>();
         team.put("TeamName", teamName);
         team.put("CoachID", coachID);
 
@@ -98,12 +120,44 @@ public class Database {
     //================================================================================
 
     //Returns TeamID and TeamName
-    public Map<String, String> getTeamsFromCoachID() {
-        return null;
+    public void getTeamsFromCoachID(String coachID) {
+        db.collection("Teams")
+                .whereEqualTo("CoachID", coachID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                teamsList.put(document.getId(), document.getData().toString());
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
     }
 
     //Returns PlayerID
-    public String getPlayersFromTeamID() {
+    public String getPlayersFromTeamID(String teamID) {
+        db.collection("players")
+                .whereEqualTo("TeamID", teamID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                playerList.put(document.getId(), document.getData().toString());
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
         return null;
     }
 
