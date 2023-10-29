@@ -2,7 +2,9 @@ package com.example.coen390_safehit;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -33,13 +35,13 @@ public class SignUp extends AppCompatActivity {
 
     void setupEditTextFields() {
         email = findViewById(R.id.editTextSignUpEmail);
-        password = findViewById(R.id.editTextSignUpPassword);
+        password = findViewById(R.id.FirstNameField);
     }
 
     void setupButtons() {
         signUp = findViewById(R.id.signUpButton);
         signUp.setOnClickListener(view -> {
-            if(validEmailAndPassword()){
+            if (validEmailAndPassword()) {
                 progressBar.setVisibility(View.VISIBLE);
                 mAuth.createUserWithEmailAndPassword(String.valueOf(email.getText()), String.valueOf(password.getText()))
                         .addOnCompleteListener(this, task -> {
@@ -48,6 +50,8 @@ public class SignUp extends AppCompatActivity {
                                 // Sign in success, update UI with the signed-in user's information
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 Toast.makeText(SignUp.this, "Account created successfully", Toast.LENGTH_SHORT).show();
+                                //Go to the next page for sign up information
+                                goToSignUpInformation();
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Toast.makeText(SignUp.this, "Authentication failed.",
@@ -58,6 +62,14 @@ public class SignUp extends AppCompatActivity {
         });
     }
 
+    void goToSignUpInformation() {
+        Intent signUpInformation = new Intent(getApplicationContext(), SignUpInformation.class);
+        Database.getInstance(this);
+        Database.email = String.valueOf(email.getText());
+        startActivity(signUpInformation);
+    }
+
+
     void setupProgressBar() {
         progressBar = findViewById(R.id.progressBar);
     }
@@ -67,7 +79,7 @@ public class SignUp extends AppCompatActivity {
     }
 
     boolean validEmailAndPassword() {
-        if (TextUtils.isEmpty(email.getText()) || TextUtils.isEmpty(password.getText())){
+        if (TextUtils.isEmpty(email.getText()) || TextUtils.isEmpty(password.getText())) {
             showToast();
             return false;
         } else return true;
