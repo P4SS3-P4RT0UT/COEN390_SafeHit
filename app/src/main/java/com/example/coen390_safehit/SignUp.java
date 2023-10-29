@@ -1,10 +1,11 @@
 package com.example.coen390_safehit;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -17,7 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class SignUp extends AppCompatActivity {
-
+    Toolbar toolbar;
     TextInputEditText email, password;
     Button signUp;
     FirebaseAuth mAuth;
@@ -31,6 +32,7 @@ public class SignUp extends AppCompatActivity {
         setupAuthentication();
         setupButtons();
         setupProgressBar();
+        setupToolBar();
     }
 
     void setupEditTextFields() {
@@ -87,5 +89,20 @@ public class SignUp extends AppCompatActivity {
 
     void showToast() {
         Toast.makeText(SignUp.this, "Please fill all required fields", Toast.LENGTH_SHORT).show();
+    }
+
+    private void setupToolBar() {
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("");
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        //Return to previous page
+        toolbar.setNavigationOnClickListener(v -> finish());
+
     }
 }
