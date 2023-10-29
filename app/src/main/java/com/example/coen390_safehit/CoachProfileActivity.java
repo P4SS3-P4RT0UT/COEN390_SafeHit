@@ -1,6 +1,9 @@
 package com.example.coen390_safehit;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -49,6 +52,7 @@ public class CoachProfileActivity extends AppCompatActivity {
         playerList = findViewById(R.id.playerList);
 
         loadTeams();
+        setupTeamSpinner();
         setupToolBar();
         setupPlayerList();
     }
@@ -64,15 +68,18 @@ public class CoachProfileActivity extends AppCompatActivity {
     }
 
     private void loadPlayers() {
+        playerslist.clear();
+        db.playerDocumentList.clear();
         db.getPlayersFromTeamID(currentTeamID, new Database.FetchCallback() {
             @Override
             public void onComplete() {
                 for (DocumentSnapshot player : db.playerDocumentList) {
-                    db.getPersonFromPlayerID(player.get("PID").toString(), task -> {
+                    db.getPersonFromPlayerID(player.getString("PID"), task -> {
                         if (task.isSuccessful()) {
                             DocumentSnapshot person = task.getResult();
                             if (person.exists()) {
-                                playerslist.add(person.get("FirstName") + " " + person.get("LastName") + ", " + player.get("Position") + ", " + player.get("Number"));
+                                Log.d("Player", person.getString("FirstName") + " " + person.getString("LastName") + ", " + player.getString("Position") + ", " + player.getString("Number"));
+                                playerslist.add(person.getString("FirstName") + " " + person.getString("LastName") + ", " + player.getString("Position") + ", " + player.getString("Number"));
                                 playerAdapter.notifyDataSetChanged();
                             } else {
                                 // Handle the error
@@ -81,11 +88,7 @@ public class CoachProfileActivity extends AppCompatActivity {
                             // Handle the error
                         }
                     });
-
-
                 }
-
-
             }
 
             @Override
@@ -119,21 +122,39 @@ public class CoachProfileActivity extends AppCompatActivity {
     }
 
 
-    //TODO: Switch teams
-    private void switchTeams() {
-        currentTeamName = teamSpinner.getSelectedItem().toString();
-        currentTeamID = db.teamsList.get(currentTeamName);
+    private boolean isFirstLoad = true;
 
-        playerslist.clear();
-        loadPlayers();
-        setupPlayerList();
-    }
-
-    private void setupToolBar() {
+    private void setupTeamSpinner() {
         teamAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_item, teamsList);
         teamAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         teamSpinner.setAdapter(teamAdapter);
 
+        //Once teamSpinner changes run switchTeams()
+        teamSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                if (isFirstLoad) {
+                    isFirstLoad = false;
+                    return;
+                }
+                switchTeams();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+        });
+    }
+
+    //TODO: Switch teams
+    private void switchTeams() {
+        currentTeamName = teamSpinner.getSelectedItem().toString();
+        currentTeamID = db.teamsList.get(currentTeamName);
+        loadPlayers();
+    }
+
+    private void setupToolBar() {
         toolbar.setTitle("Coach Profile");
         toolbar.setNavigationIcon(null);
         setSupportActionBar(toolbar);

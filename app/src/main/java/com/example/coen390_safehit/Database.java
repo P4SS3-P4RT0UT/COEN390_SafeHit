@@ -210,22 +210,18 @@ public class Database {
         db.collection("Players")
                 .whereEqualTo("TeamID", teamID)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                if (!playerDocumentList.contains(document)) {
-                                    playerDocumentList.add(document);
-                                    Log.d(TAG, document.getId() + " => " + document.getData());
-
-                                }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            if (!playerDocumentList.contains(document)) {
+                                playerDocumentList.add(document);
+                                Log.d(TAG, document.getId() + " => " + document.getData());
                             }
-                            callback.onComplete();
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                            callback.onError(task.getException());
                         }
+                        callback.onComplete();
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
+                        callback.onError(task.getException());
                     }
                 });
 
