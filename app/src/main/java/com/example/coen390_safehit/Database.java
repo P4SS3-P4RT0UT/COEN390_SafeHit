@@ -4,7 +4,6 @@ import static android.content.ContentValues.TAG;
 
 import android.content.Context;
 import android.content.Intent;
-import android.telecom.Call;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -187,10 +186,12 @@ public class Database {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                teamsList.put(document.getData().get("TeamName").toString(), document.getId());
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                callback.onComplete();
+                                if (!teamsList.containsKey(document.getId())) {
+                                    teamsList.put(document.getData().get("TeamName").toString(), document.getId());
+                                    Log.d(TAG, document.getId() + " => " + document.getData());
+                                }
                             }
+                            callback.onComplete();
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                             callback.onError(task.getException());
@@ -214,10 +215,13 @@ public class Database {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                playerDocumentList.add(document);
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                callback.onComplete();
+                                if (!playerDocumentList.contains(document)) {
+                                    playerDocumentList.add(document);
+                                    Log.d(TAG, document.getId() + " => " + document.getData());
+
+                                }
                             }
+                            callback.onComplete();
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                             callback.onError(task.getException());

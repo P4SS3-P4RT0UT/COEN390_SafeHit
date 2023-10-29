@@ -134,7 +134,7 @@ public class CoachProfileActivity extends AppCompatActivity {
         teamAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         teamSpinner.setAdapter(teamAdapter);
 
-        toolbar.setTitle("");
+        toolbar.setTitle("Coach Profile");
         toolbar.setNavigationIcon(null);
         setSupportActionBar(toolbar);
     }
