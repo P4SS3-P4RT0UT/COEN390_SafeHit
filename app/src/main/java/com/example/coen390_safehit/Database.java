@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.telecom.Call;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -32,7 +33,9 @@ public class Database {
     public static String currentTeamID;
     public static String currentTeamName;
     private static Context currentContext;
-
+    public TextView playerStatus;
+    public TextView coachSuggestion;
+    public TextView playerName;
     public static String email;
 
     public static synchronized Database getInstance(Context context) {
@@ -270,6 +273,68 @@ public class Database {
                         callback.onError(task.getException());
                     }
                 });
+    }
+
+    public String getStatus(String personID) {
+        db.collection("Players")
+                .whereEqualTo("PID", personID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                                playerStatus.setText(document.getString("Status"));
+                            }
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
+        return null;
+    }
+
+    public String getSuggestion(String personID) {
+        db.collection("Players")
+                .whereEqualTo("PID", personID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                                coachSuggestion.setText(document.getString("Suggestion"));
+                            }
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
+        return null;
+    }
+
+    public String getPlayerNameFromPlayerID(String personID) {
+        db.collection("Person")
+                .document(personID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            Log.d(TAG, document.getId() + " => " + document.getData());
+                            playerName.setText((document.getString("FirstName") + " " + document.getString("LastName")));
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
+        return null;
     }
 
 
