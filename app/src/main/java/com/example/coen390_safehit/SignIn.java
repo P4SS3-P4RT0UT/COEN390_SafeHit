@@ -37,12 +37,12 @@ public class SignIn extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         FirebaseUser user = mAuth.getCurrentUser();
-        if(user != null) {
+        if (user != null) {
             // Go to profile/main page
         }
     }
 
-    void setupEditTextFields(){
+    void setupEditTextFields() {
         // Email
         email = findViewById(R.id.editTextSignInEmail);
         // Password
@@ -53,11 +53,11 @@ public class SignIn extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
     }
 
-    void setupButtons(){
+    void setupButtons() {
         // Sign in button
         signIn = findViewById(R.id.signInButton);
         signIn.setOnClickListener(view -> {
-            if(validEmailAndPassword()){
+            if (validEmailAndPassword()) {
                 progressBar.setVisibility(View.VISIBLE);
                 // Connect to account
                 mAuth.signInWithEmailAndPassword(String.valueOf(email.getText()), String.valueOf(password.getText()))
@@ -66,6 +66,7 @@ public class SignIn extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 // Sign in success, update UI with the signed-in user's information
                                 Toast.makeText(SignIn.this, "Sign in successful", Toast.LENGTH_SHORT).show();
+                                checkDatabase();
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Toast.makeText(SignIn.this, "Authentication failed.",
@@ -81,12 +82,42 @@ public class SignIn extends AppCompatActivity {
         });
     }
 
+    void checkDatabase() {
+        Database db = Database.getInstance(this);
+        db.getPersonFromEmail(email.getText().toString(), new Database.FetchCallback() {
+            @Override
+            public void onComplete() {
+                if (Database.personType.equals("Coach") || Database.personType.equals("Trainer"))
+                    goToCoachProfile();
+                else if (Database.personType.equals("Player"))
+                    goToPlayerProfile();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(SignIn.this, "Person not found in the database", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    void goToCoachProfile() {
+        Intent coachProfile = new Intent(getApplicationContext(), CoachProfileActivity.class);
+        startActivity(coachProfile);
+    }
+
+    //TODO : Go to player profile
+    void goToPlayerProfile() {
+//        Intent playerProfile = new Intent(getApplicationContext(), PlayerProfileActivity.class);
+//        startActivity(playerProfile);
+    }
+
     void setupProgressBar() {
         progressBar = findViewById(R.id.progressBar);
     }
 
     boolean validEmailAndPassword() {
-        if(TextUtils.isEmpty(email.getText()) || TextUtils.isEmpty(password.getText())) {
+        if (TextUtils.isEmpty(email.getText()) || TextUtils.isEmpty(password.getText())) {
             showToast();
             return false;
         } else return true;

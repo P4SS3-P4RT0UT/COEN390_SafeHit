@@ -3,11 +3,19 @@ package com.example.coen390_safehit;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatSpinner;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,16 +25,19 @@ public class CoachProfileActivity extends AppCompatActivity {
     // Layout elements
     private Toolbar toolbar;
     private ListView playerList;
-    private AppCompatSpinner teamSpinner;
+    private Spinner teamSpinner;
 
 
     // Database
-    Database db = Database.getInstance();
+    Database db = Database.getInstance(this);
     String coachID = Database.personID;
+
     private List<String> teamsList = new ArrayList<>();
+    ArrayAdapter<String> teamAdapter;
     private String currentTeamName = null;
     public String currentTeamID = null;
     private List<String> playerslist = new ArrayList<>();
+    ArrayAdapter<String> playerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +49,6 @@ public class CoachProfileActivity extends AppCompatActivity {
         playerList = findViewById(R.id.playerList);
 
         loadTeams();
-        loadPlayers();
         setupToolBar();
         setupPlayerList();
     }
@@ -49,30 +59,67 @@ public class CoachProfileActivity extends AppCompatActivity {
     }
 
     private void setupPlayerList() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, playerslist);
-        playerList.setAdapter(adapter);
-
-
+        playerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, playerslist);
+        playerList.setAdapter(playerAdapter);
     }
 
     private void loadPlayers() {
-        db.getPlayersFromTeamID(currentTeamID);
-        db.playerList.forEach((key, value) -> {
-            playerslist.add(value);
+        db.getPlayersFromTeamID(currentTeamID, new Database.FetchCallback() {
+            @Override
+            public void onComplete() {
+                for (DocumentSnapshot player : db.playerDocumentList) {
+                    db.getPersonFromPlayerID(player.get("PID").toString(), task -> {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot person = task.getResult();
+                            if (person.exists()) {
+                                playerslist.add(person.get("FirstName") + " " + person.get("LastName") + ", " + player.get("Position") + ", " + player.get("Number"));
+                                playerAdapter.notifyDataSetChanged();
+                            } else {
+                                // Handle the error
+                            }
+                        } else {
+                            // Handle the error
+                        }
+                    });
+
+
+                }
+
+
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(CoachProfileActivity.this, "Error loading players", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
     private void loadTeams() {
-        db.getTeamsFromCoachID(coachID);
-        db.teamsList.forEach((key, value) -> {
-            if (currentTeamID == null) {
-                currentTeamID = key;
-                currentTeamName = value;
+        db.getTeamsFromCoachID(coachID, new Database.FetchCallback() {
+            @Override
+            public void onComplete() {
+                db.teamsList.forEach((key, value) -> {
+                    if (currentTeamID == null) {
+                        currentTeamName = key;
+                        currentTeamID = value;
+                    }
+                    teamsList.add(key);
+                });
+
+                teamAdapter.notifyDataSetChanged();
+                loadPlayers();
             }
-            teamsList.add(value);
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(CoachProfileActivity.this, "Error loading teams", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
+
+    //TODO: Switch teams
     private void switchTeams() {
         currentTeamName = teamSpinner.getSelectedItem().toString();
         currentTeamID = db.teamsList.get(currentTeamName);
@@ -83,9 +130,9 @@ public class CoachProfileActivity extends AppCompatActivity {
     }
 
     private void setupToolBar() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.custom_spinner_item, teamsList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        teamSpinner.setAdapter(adapter);
+        teamAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_item, teamsList);
+        teamAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        teamSpinner.setAdapter(teamAdapter);
 
         toolbar.setTitle("");
         toolbar.setNavigationIcon(null);

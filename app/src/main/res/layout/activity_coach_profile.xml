@@ -12,31 +12,33 @@
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
+        app:contentInsetStart="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:contentInsetStart="10dp">
-
-        <androidx.appcompat.widget.AppCompatSpinner
-            android:id="@+id/teamList"
-            android:layout_width="fill_parent"
-            android:layout_height="60dp"
-            android:layout_gravity="start|center_vertical"
-            android:gravity="start" />
+        app:layout_constraintTop_toTopOf="parent">
 
     </androidx.appcompat.widget.Toolbar>
+
+    <Spinner
+        android:id="@+id/teamList"
+        android:layout_width="fill_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="start|center_vertical"
+        android:gravity="start"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
     <TextView
         android:id="@+id/playerText"
         android:layout_width="200dp"
         android:layout_height="60dp"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
         android:text="Players"
         android:textAlignment="textStart"
         android:textSize="34sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/teamList" />
 
     <ListView
         android:id="@+id/playerList"
