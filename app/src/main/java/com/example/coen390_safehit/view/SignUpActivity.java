@@ -19,7 +19,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class SignUp extends AppCompatActivity {
+public class SignUpActivity extends AppCompatActivity {
     Toolbar toolbar;
     TextInputEditText email, password;
     Button signUp;
@@ -53,12 +53,12 @@ public class SignUp extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 // Sign in success, update UI with the signed-in user's information
                                 FirebaseUser user = mAuth.getCurrentUser();
-                                Toast.makeText(SignUp.this, "Account created successfully", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SignUpActivity.this, "Account created successfully", Toast.LENGTH_SHORT).show();
                                 //Go to the next page for sign up information
                                 goToSignUpInformation();
                             } else {
                                 // If sign in fails, display a message to the user.
-                                Toast.makeText(SignUp.this, "Authentication failed.",
+                                Toast.makeText(SignUpActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -67,7 +67,7 @@ public class SignUp extends AppCompatActivity {
     }
 
     void goToSignUpInformation() {
-        Intent signUpInformation = new Intent(getApplicationContext(), SignUpInformation.class);
+        Intent signUpInformation = new Intent(getApplicationContext(), SignUpInformationActivity.class);
         Database.getInstance(this);
         Database.email = String.valueOf(email.getText());
         startActivity(signUpInformation);
@@ -90,7 +90,7 @@ public class SignUp extends AppCompatActivity {
     }
 
     void showToast() {
-        Toast.makeText(SignUp.this, "Please fill all required fields", Toast.LENGTH_SHORT).show();
+        Toast.makeText(SignUpActivity.this, "Please fill all required fields", Toast.LENGTH_SHORT).show();
     }
 
     private void setupToolBar() {

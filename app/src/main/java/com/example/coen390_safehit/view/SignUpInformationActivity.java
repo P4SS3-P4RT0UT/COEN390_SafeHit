@@ -16,7 +16,7 @@ import com.example.coen390_safehit.model.Database;
 import com.example.coen390_safehit.R;
 import com.google.android.material.textfield.TextInputEditText;
 
-public class SignUpInformation extends AppCompatActivity {
+public class SignUpInformationActivity extends AppCompatActivity {
     AutoCompleteTextView typeDropdown, teamDropdown;
     LinearLayout coachLayout, playerLayout, trainerLayout;
     Button signUpButton;

@@ -16,7 +16,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class SignIn extends AppCompatActivity {
+public class SignInActivity extends AppCompatActivity {
 
     // Layout elements
     TextInputEditText email, password;
@@ -67,11 +67,11 @@ public class SignIn extends AppCompatActivity {
                             progressBar.setVisibility(View.GONE);
                             if (task.isSuccessful()) {
                                 // Sign in success, update UI with the signed-in user's information
-                                Toast.makeText(SignIn.this, "Sign in successful", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SignInActivity.this, "Sign in successful", Toast.LENGTH_SHORT).show();
                                 checkDatabase();
                             } else {
                                 // If sign in fails, display a message to the user.
-                                Toast.makeText(SignIn.this, "Authentication failed.",
+                                Toast.makeText(SignInActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -97,7 +97,7 @@ public class SignIn extends AppCompatActivity {
 
             @Override
             public void onError(Exception e) {
-                Toast.makeText(SignIn.this, "Person not found in the database", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SignInActivity.this, "Person not found in the database", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -125,11 +125,11 @@ public class SignIn extends AppCompatActivity {
     }
 
     void showToast() {
-        Toast.makeText(SignIn.this, "Please fill out all required fields", Toast.LENGTH_SHORT).show();
+        Toast.makeText(SignInActivity.this, "Please fill out all required fields", Toast.LENGTH_SHORT).show();
     }
 
     void goToSignUp() {
-        Intent signUp = new Intent(getApplicationContext(), SignUp.class);
+        Intent signUp = new Intent(getApplicationContext(), SignUpActivity.class);
         startActivity(signUp);
     }
 }
