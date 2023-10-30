@@ -106,10 +106,9 @@ public class SignIn extends AppCompatActivity {
         startActivity(coachProfile);
     }
 
-    //TODO : Go to player profile
     void goToPlayerProfile() {
-//        Intent playerProfile = new Intent(getApplicationContext(), PlayerProfileActivity.class);
-//        startActivity(playerProfile);
+        Intent playerProfile = new Intent(getApplicationContext(), PlayerProfileActivity.class);
+        startActivity(playerProfile);
     }
 
     void setupProgressBar() {

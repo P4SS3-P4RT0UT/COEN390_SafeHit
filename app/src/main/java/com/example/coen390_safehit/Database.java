@@ -122,7 +122,8 @@ public class Database {
                 db.collection("Players").add(player)
                         .addOnSuccessListener(documentReference -> {
                             Toast.makeText(currentContext, "Player added successfully", Toast.LENGTH_SHORT).show();
-                            // TODO: Go to PlayerProfileActivity
+                            Intent playerProfile = new Intent(currentContext, PlayerProfileActivity.class);
+                            currentContext.startActivity(playerProfile);
                         })
                         .addOnFailureListener(
                                 e -> {
