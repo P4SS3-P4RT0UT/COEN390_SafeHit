@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    tools:context=".SignIn"
+    tools:context=".view.SignIn"
     android:padding="25dp">
 
     <TextView

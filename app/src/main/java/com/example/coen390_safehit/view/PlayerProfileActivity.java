@@ -1,9 +1,12 @@
-package com.example.coen390_safehit;
+package com.example.coen390_safehit.view;
 
 import android.os.Bundle;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.coen390_safehit.model.Database;
+import com.example.coen390_safehit.R;
 
 public class PlayerProfileActivity extends AppCompatActivity {
 

@@ -22,7 +22,7 @@
         android:gravity="center"
         android:orientation="vertical"
         android:padding="25dp"
-        tools:context=".SignUp">
+        tools:context=".view.SignUp">
 
 
         <TextView

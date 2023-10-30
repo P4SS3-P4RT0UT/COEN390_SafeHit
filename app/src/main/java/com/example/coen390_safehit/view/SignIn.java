@@ -1,4 +1,4 @@
-package com.example.coen390_safehit;
+package com.example.coen390_safehit.view;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.coen390_safehit.model.Database;
+import com.example.coen390_safehit.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
