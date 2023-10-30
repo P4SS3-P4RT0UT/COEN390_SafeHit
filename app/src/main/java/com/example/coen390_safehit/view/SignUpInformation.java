@@ -1,4 +1,4 @@
-package com.example.coen390_safehit;
+package com.example.coen390_safehit.view;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,6 +12,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.coen390_safehit.model.Database;
+import com.example.coen390_safehit.R;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class SignUpInformation extends AppCompatActivity {

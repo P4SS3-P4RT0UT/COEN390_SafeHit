@@ -1,4 +1,4 @@
-package com.example.coen390_safehit;
+package com.example.coen390_safehit.model;
 
 import static android.content.ContentValues.TAG;
 
@@ -10,6 +10,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.example.coen390_safehit.view.CoachProfileActivity;
+import com.example.coen390_safehit.view.PlayerProfileActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -122,7 +124,8 @@ public class Database {
                 db.collection("Players").add(player)
                         .addOnSuccessListener(documentReference -> {
                             Toast.makeText(currentContext, "Player added successfully", Toast.LENGTH_SHORT).show();
-                            // TODO: Go to PlayerProfileActivity
+                            Intent playerProfile = new Intent(currentContext, PlayerProfileActivity.class);
+                            currentContext.startActivity(playerProfile);
                         })
                         .addOnFailureListener(
                                 e -> {

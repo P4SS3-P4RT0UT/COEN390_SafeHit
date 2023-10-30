@@ -1,4 +1,4 @@
-package com.example.coen390_safehit;
+package com.example.coen390_safehit.view;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -9,19 +9,15 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatSpinner;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.example.coen390_safehit.model.Database;
+import com.example.coen390_safehit.R;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class CoachProfileActivity extends AppCompatActivity {
