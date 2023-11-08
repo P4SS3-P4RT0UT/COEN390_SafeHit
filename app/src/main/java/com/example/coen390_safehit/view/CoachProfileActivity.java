@@ -13,7 +13,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.coen390_safehit.model.Database;
+import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.R;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -28,8 +28,8 @@ public class CoachProfileActivity extends AppCompatActivity {
 
 
     // Database
-    Database db = Database.getInstance(this);
-    String coachID = Database.personID;
+    DatabaseHelper db = DatabaseHelper.getInstance(this);
+    String coachID = DatabaseHelper.personID;
 
     private List<String> teamsList = new ArrayList<>();
     ArrayAdapter<String> teamAdapter;
@@ -66,7 +66,7 @@ public class CoachProfileActivity extends AppCompatActivity {
     private void loadPlayers() {
         playerslist.clear();
         db.playerDocumentList.clear();
-        db.getPlayersFromTeamID(currentTeamID, new Database.FetchCallback() {
+        db.getPlayersFromTeamID(currentTeamID, new DatabaseHelper.FetchCallback() {
             @Override
             public void onComplete() {
                 for (DocumentSnapshot player : db.playerDocumentList) {
@@ -95,7 +95,7 @@ public class CoachProfileActivity extends AppCompatActivity {
     }
 
     private void loadTeams() {
-        db.getTeamsFromCoachID(coachID, new Database.FetchCallback() {
+        db.getTeamsFromCoachID(coachID, new DatabaseHelper.FetchCallback() {
             @Override
             public void onComplete() {
                 db.teamsList.forEach((key, value) -> {

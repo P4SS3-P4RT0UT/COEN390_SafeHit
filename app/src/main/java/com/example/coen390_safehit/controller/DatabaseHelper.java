@@ -1,4 +1,4 @@
-package com.example.coen390_safehit.model;
+package com.example.coen390_safehit.controller;
 
 import static android.content.ContentValues.TAG;
 
@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Database {
-    private static Database databaseInstance = null;
+public class DatabaseHelper {
+    private static DatabaseHelper databaseHelperInstance = null;
     public ArrayList<DocumentSnapshot> playerDocumentList = new ArrayList<>();
     public HashMap<String, String> teamsList = new HashMap<>();
 
@@ -39,11 +39,11 @@ public class Database {
     public TextView playerName;
     public static String email;
 
-    public static synchronized Database getInstance(Context context) {
-        if (databaseInstance == null)
-            databaseInstance = new Database();
+    public static synchronized DatabaseHelper getInstance(Context context) {
+        if (databaseHelperInstance == null)
+            databaseHelperInstance = new DatabaseHelper();
         currentContext = context;
-        return databaseInstance;
+        return databaseHelperInstance;
     }
 
     public interface AddCallback {

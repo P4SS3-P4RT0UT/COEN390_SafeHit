@@ -5,14 +5,14 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.coen390_safehit.model.Database;
+import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.R;
 
 public class PlayerProfileActivity extends AppCompatActivity {
 
     TextView coachSuggestion, playerStatus, playerName;
-    Database db = Database.getInstance(this);
-    String playerID = Database.personID;
+    DatabaseHelper db = DatabaseHelper.getInstance(this);
+    String playerID = DatabaseHelper.personID;
 
 
     @Override
