@@ -103,14 +103,17 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="65dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/position_field"
+            <AutoCompleteTextView
+                android:id="@+id/position_field_dropdown"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/position" />
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:hint="@string/position"
+                android:inputType="none"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout

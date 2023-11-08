@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -12,21 +14,25 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.coen390_safehit.model.Database;
+import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.R;
+import com.example.coen390_safehit.model.Position;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class SignUpInformation extends AppCompatActivity {
-    AutoCompleteTextView typeDropdown, teamDropdown;
+
+    AutoCompleteTextView typeDropdown, teamDropdown, positionDropdown;
+    //Spinner positionDropdown;
     LinearLayout coachLayout, playerLayout, trainerLayout;
     Button signUpButton;
     TextInputEditText firstName, lastName;
     TextInputEditText teamName;
-    TextInputEditText positon, number;
+    TextInputEditText number;
     ProgressBar progressBar;
-    Database db = Database.getInstance(this);
+    DatabaseHelper db = DatabaseHelper.getInstance(this);
 
     String currentType;
+    String position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +46,18 @@ public class SignUpInformation extends AppCompatActivity {
         firstName = findViewById(R.id.firstname_field);
         lastName = findViewById(R.id.lastname_field);
         teamName = findViewById(R.id.teamname_field);
-        positon = findViewById(R.id.position_field);
         number = findViewById(R.id.number_field);
         progressBar = findViewById(R.id.progressBar);
         setupButton();
+    }
+
+    private void setupPositionDropdown() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, Position.getPositionList());
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        positionDropdown.setAdapter(adapter);
+        positionDropdown.setOnItemClickListener((adapterView, view, i, l) -> {
+            position = adapterView.getItemAtPosition(i).toString();
+        });
     }
 
     private void setupTypeDropdown() {
@@ -64,7 +78,9 @@ public class SignUpInformation extends AppCompatActivity {
                 playerLayout.setVisibility(LinearLayout.VISIBLE);
                 trainerLayout.setVisibility(LinearLayout.GONE);
                 teamDropdown = findViewById(R.id.teamnamePlayer_dropdown);
+                positionDropdown = findViewById(R.id.position_field_dropdown);
                 setupTeamDropdown();
+                setupPositionDropdown();
             } else if (type.equals("Trainer")) {
                 coachLayout.setVisibility(LinearLayout.GONE);
                 playerLayout.setVisibility(LinearLayout.GONE);
@@ -84,7 +100,7 @@ public class SignUpInformation extends AppCompatActivity {
                     db.addCoach(firstName.getText().toString(), lastName.getText().toString(), teamName.getText().toString());
                 } else if (currentType.equals("Player")) {
                     db.teamsList.get(teamDropdown.getText().toString());
-                    db.addPlayer(firstName.getText().toString(), lastName.getText().toString(), positon.getText().toString(), number.getText().toString(), db.teamsList.get(teamDropdown.getText().toString()));
+                    db.addPlayer(firstName.getText().toString(), lastName.getText().toString(), position, number.getText().toString(), db.teamsList.get(teamDropdown.getText().toString()));
                 } else if (currentType.equals("Trainer")) {
                     db.addTrainer(firstName.getText().toString(), lastName.getText().toString(), db.teamsList.get(teamName.getText().toString()));
                 }
@@ -99,7 +115,11 @@ public class SignUpInformation extends AppCompatActivity {
     }
 
     boolean verifyInputs() {
-        if (TextUtils.isEmpty(firstName.getText()) || TextUtils.isEmpty(lastName.getText()) || TextUtils.isEmpty(teamName.getText()) && TextUtils.isEmpty(teamDropdown.getText()) || ((currentType.equals("Player") && ((TextUtils.isEmpty(positon.getText()) || TextUtils.isEmpty(number.getText())))))) {
+        if (TextUtils.isEmpty(firstName.getText()) ||
+                TextUtils.isEmpty(lastName.getText()) ||
+                (TextUtils.isEmpty(teamName.getText()) && TextUtils.isEmpty(teamDropdown.getText()) ||
+                        (currentType.equals("Player") && position == null) ||
+                TextUtils.isEmpty(number.getText()))) {
             showToast();
             return false;
         } else return true;

@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.coen390_safehit.model.Database;
+import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -70,7 +70,7 @@ public class SignIn extends AppCompatActivity {
                                 Toast.makeText(SignIn.this, "Sign in successful", Toast.LENGTH_SHORT).show();
                                 checkDatabase();
                             } else {
-                                // If sign in fails, display a message to the user.
+                                // If sign in fails, display a message to the user
                                 Toast.makeText(SignIn.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
                             }
@@ -85,13 +85,13 @@ public class SignIn extends AppCompatActivity {
     }
 
     void checkDatabase() {
-        Database db = Database.getInstance(this);
-        db.getPersonFromEmail(email.getText().toString(), new Database.FetchCallback() {
+        DatabaseHelper db = DatabaseHelper.getInstance(this);
+        db.getPersonFromEmail(email.getText().toString(), new DatabaseHelper.FetchCallback() {
             @Override
             public void onComplete() {
-                if (Database.personType.equals("Coach") || Database.personType.equals("Trainer"))
+                if (DatabaseHelper.personType.equals("Coach") || DatabaseHelper.personType.equals("Trainer"))
                     goToCoachProfile();
-                else if (Database.personType.equals("Player"))
+                else if (DatabaseHelper.personType.equals("Player"))
                     goToPlayerProfile();
             }
 

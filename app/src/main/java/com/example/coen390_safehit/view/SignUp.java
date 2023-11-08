@@ -13,7 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 
-import com.example.coen390_safehit.model.Database;
+import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -68,8 +68,8 @@ public class SignUp extends AppCompatActivity {
 
     void goToSignUpInformation() {
         Intent signUpInformation = new Intent(getApplicationContext(), SignUpInformation.class);
-        Database.getInstance(this);
-        Database.email = String.valueOf(email.getText());
+        DatabaseHelper.getInstance(this);
+        DatabaseHelper.email = String.valueOf(email.getText());
         startActivity(signUpInformation);
     }
 
