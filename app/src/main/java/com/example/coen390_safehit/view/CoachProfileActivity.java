@@ -1,5 +1,6 @@
 package com.example.coen390_safehit.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -61,6 +62,13 @@ public class CoachProfileActivity extends AppCompatActivity {
     private void setupPlayerList() {
         playerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, playerslist);
         playerList.setAdapter(playerAdapter);
+        playerList.setOnItemClickListener((adapterView, view, i, l) -> {
+//            String selectedItem = (String) adapterView.getItemAtPosition(position);
+//            selectedProfile = studentMap.get(selectedItem);
+
+            Intent intent = new Intent(this, CoachDataOverviewActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void loadPlayers() {

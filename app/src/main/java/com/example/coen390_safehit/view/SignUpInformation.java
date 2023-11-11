@@ -4,9 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -119,7 +117,7 @@ public class SignUpInformation extends AppCompatActivity {
                 TextUtils.isEmpty(lastName.getText()) ||
                 (TextUtils.isEmpty(teamName.getText()) && TextUtils.isEmpty(teamDropdown.getText()) ||
                         (currentType.equals("Player") && position == null) ||
-                TextUtils.isEmpty(number.getText()))) {
+                        TextUtils.isEmpty(number.getText()))) {
             showToast();
             return false;
         } else return true;
