@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -14,6 +15,9 @@
         android:theme="@style/Theme.COEN390_SafeHit"
         tools:targetApi="31">
         <activity
+            android:name=".view.SettingsActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.SignIn"
             android:exported="true">
             <intent-filter>
@@ -24,24 +28,26 @@
         </activity>
         <activity
             android:name=".view.SignUp"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".view.CoachProfileActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".view.SignUpInformation"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".view.PlayerProfileActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".view.CoachDataOverviewActivity"
             android:exported="true">
-            <!--            <intent-filter>-->
-            <!--                <action android:name="android.intent.action.MAIN" />-->
 
-            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
-            <!--            </intent-filter>-->
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
     </application>
 

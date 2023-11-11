@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -26,7 +27,8 @@ public class CoachProfileActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private ListView playerList;
     private Spinner teamSpinner;
-
+    // Settings icon
+    ImageButton btnSettings;
 
     // Database
     DatabaseHelper db = DatabaseHelper.getInstance(this);
@@ -162,6 +164,15 @@ public class CoachProfileActivity extends AppCompatActivity {
         toolbar.setTitle("Coach Profile");
         toolbar.setNavigationIcon(null);
         setSupportActionBar(toolbar);
+        // Settings icon
+        btnSettings = findViewById(R.id.btnSettings);
+        btnSettings.setOnClickListener(view -> goToSettings());
+    }
+
+    void goToSettings() {
+        Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+        intent.putExtra("pid", coachID);
+        startActivity(intent);
     }
 
 

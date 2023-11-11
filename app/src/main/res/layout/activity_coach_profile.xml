@@ -17,6 +17,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <ImageButton
+            android:id="@+id/btnSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_settings"
+            android:background="?attr/colorPrimary"
+            android:layout_marginEnd="10dp"
+            android:layout_gravity="end"/>
+
     </androidx.appcompat.widget.Toolbar>
 
     <Spinner
