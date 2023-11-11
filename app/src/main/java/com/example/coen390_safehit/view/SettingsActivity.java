@@ -11,15 +11,14 @@ import com.example.coen390_safehit.R;
 public class SettingsActivity extends AppCompatActivity {
 
     // Person id to identify user
-    private int uid;
+    private String uid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         // Fetch the id from the previous activity
-        int defaultValue = -1;
-        uid = getIntent().getIntExtra("pid", defaultValue);
+        //uid = getIntent().getStringExtra("pid");
     }
 
     public void onLogOutClicked(View view) {

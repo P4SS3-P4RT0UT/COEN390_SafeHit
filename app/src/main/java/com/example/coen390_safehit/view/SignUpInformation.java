@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -20,7 +21,7 @@ import com.google.android.material.textfield.TextInputEditText;
 public class SignUpInformation extends AppCompatActivity {
 
     AutoCompleteTextView typeDropdown, teamDropdown, positionDropdown;
-    //Spinner positionDropdown;
+
     LinearLayout coachLayout, playerLayout, trainerLayout;
     Button signUpButton;
     TextInputEditText firstName, lastName;
@@ -36,20 +37,168 @@ public class SignUpInformation extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_information);
-        setupTypeDropdown();
+
+        // Setup all user layouts (player, coach, trainer)
+        setupUserLayouts();
+
+        // For first name, last name, and type dropdown
+        setupGeneralUserInfo();
+
+        // Setup the progress bar
+        progressBar = findViewById(R.id.progressBar);
+
+        // Setup the sign up button
+        setupSignUpButton();
+    }
+
+    // To setup all possible user layouts
+    public void setupUserLayouts() {
+        // Layout of coach, player, and trainer
         coachLayout = findViewById(R.id.coach_layout);
         playerLayout = findViewById(R.id.player_layout);
         trainerLayout = findViewById(R.id.trainer_layout);
-
-        firstName = findViewById(R.id.firstname_field);
-        lastName = findViewById(R.id.lastname_field);
-        teamName = findViewById(R.id.teamname_field);
-        number = findViewById(R.id.number_field);
-        progressBar = findViewById(R.id.progressBar);
-        setupButton();
     }
 
+    // To setup layout fields available to all users
+    public void setupGeneralUserInfo() {
+        // Input text for first name, last name
+        firstName = findViewById(R.id.firstname_field);
+        lastName = findViewById(R.id.lastname_field);
+        // Setup the type dropdown
+        setupTypeDropdown();
+    }
+
+    // To enable the user type selection
+    private void setupTypeDropdown() {
+        // Create type dropdown menu
+        typeDropdown = findViewById(R.id.type_dropdown);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.personType, android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        typeDropdown.setAdapter(adapter);
+
+        // Get user type selection
+        typeDropdown.setOnItemClickListener((adapterView, view, i, l) -> {
+            String type = adapterView.getItemAtPosition(i).toString();
+            currentType = type;
+            // Set the layout visibility according to the type selection
+            if (type.equals("Coach")) {
+                // Show coach layout and enable fields specific to user type
+                coachLayout.setVisibility(LinearLayout.VISIBLE);
+                enableCoachReservedFields();
+                // Hide other layouts
+                playerLayout.setVisibility(LinearLayout.GONE);
+                trainerLayout.setVisibility(LinearLayout.GONE);
+            } else if (type.equals("Player")) {
+                // Show player layout and enable fields specific to user type
+                playerLayout.setVisibility(LinearLayout.VISIBLE);
+                enablePlayerReservedFields();
+                // Hide other layouts
+                coachLayout.setVisibility(LinearLayout.GONE);
+                trainerLayout.setVisibility(LinearLayout.GONE);
+            } else if (type.equals("Trainer")) {
+                // Show trainer layout and enable fields specific to user type
+                trainerLayout.setVisibility(LinearLayout.VISIBLE);
+                enableTrainerReservedFields();
+                // Hide other layouts
+                coachLayout.setVisibility(LinearLayout.GONE);
+                playerLayout.setVisibility(LinearLayout.GONE);
+            }
+        });
+    }
+
+    // To setup the sign up button
+    public void setupSignUpButton() {
+        // Setup the sign up button
+        signUpButton = findViewById(R.id.signUpButton);
+        signUpButton.setOnClickListener(view -> {
+            // Check for valid inputs
+            if(validUserInput()) {
+                // Show progress bar
+                progressBar.setVisibility(View.VISIBLE);
+                // Add the user to the database
+                switch (currentType) {
+                    case "Coach":
+                        db.addCoach(firstName.getText().toString(), lastName.getText().toString(), teamName.getText().toString());
+                        break;
+                    case "Player":
+                        db.teamsList.get(teamDropdown.getText().toString());
+                        db.addPlayer(firstName.getText().toString(), lastName.getText().toString(), positionDropdown.getText().toString(), number.getText().toString(), db.teamsList.get(teamDropdown.getText().toString()));
+                        break;
+                    case "Trainer":
+                        db.addTrainer(firstName.getText().toString(), lastName.getText().toString(), db.teamsList.get(teamName.getText().toString()));
+                        break;
+                    default:
+                        Log.d("SIGN UP EXCEPTION", "Error trying to determine user type (setupSignUpButton())");
+                }
+            }
+        });
+    }
+
+    // To check if all user inputs are valid
+    public boolean validUserInput() {
+        // For all user types, check first name, last name, and user type
+        if(TextUtils.isEmpty(firstName.getText()) || TextUtils.isEmpty(lastName.getText()) || TextUtils.isEmpty(currentType)) {
+            showToast("Please fill all required fields");
+            return false;
+        }
+        switch(currentType) {
+            case "Coach":
+                // Check for team name
+                if(TextUtils.isEmpty(teamName.getText())) {
+                    showToast("Please enter a team name");
+                    return false;
+                }
+                break;
+            case "Player":
+                // Check for team name, position, and number
+                if(TextUtils.isEmpty(teamDropdown.getText()) || TextUtils.isEmpty(positionDropdown.getText()) || TextUtils.isEmpty(number.getText())) {
+                    showToast("Please fill all required fields");
+                    return false;
+                }
+                break;
+            case "Trainer":
+                // Check for team name
+                if(TextUtils.isEmpty(teamDropdown.getText())) {
+                    showToast("Please select a team from the dropdown menu");
+                    return false;
+                }
+                break;
+            default:
+                Log.d("SIGN UP EXCEPTION", "Error trying to determine user type (verifyInputs())");
+                return false;
+        }
+        // No invalid inputs, return true
+        return true;
+    }
+
+    // Show a toast message
+    void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    // Functions to manage extra fields specific to each user
+    public void enablePlayerReservedFields() {
+        // Dropdown menu to select the player's team
+        setupTeamDropdown();
+        // Dropdown menu to select the player's position
+        setupPositionDropdown();
+        // To enter the player's number
+        number = findViewById(R.id.number_field);
+    }
+
+    public void enableCoachReservedFields() {
+        // To enter team name
+        teamName = findViewById(R.id.teamname_field);
+    }
+
+    public void enableTrainerReservedFields() {
+        // Dropdown menu to select the trainer's team
+        setupTeamDropdown();
+    }
+
+    // To setup the dropdown for a player's position (players only)
     private void setupPositionDropdown() {
+        positionDropdown = findViewById(R.id.position_field_dropdown);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, Position.getPositionList());
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         positionDropdown.setAdapter(adapter);
@@ -58,72 +207,11 @@ public class SignUpInformation extends AppCompatActivity {
         });
     }
 
-    private void setupTypeDropdown() {
-        typeDropdown = findViewById(R.id.type_dropdown);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.personType, android.R.layout.simple_spinner_dropdown_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        typeDropdown.setAdapter(adapter);
-
-        typeDropdown.setOnItemClickListener((adapterView, view, i, l) -> {
-            String type = adapterView.getItemAtPosition(i).toString();
-            currentType = type;
-            if (type.equals("Coach")) {
-                coachLayout.setVisibility(LinearLayout.VISIBLE);
-                playerLayout.setVisibility(LinearLayout.GONE);
-                trainerLayout.setVisibility(LinearLayout.GONE);
-            } else if (type.equals("Player")) {
-                coachLayout.setVisibility(LinearLayout.GONE);
-                playerLayout.setVisibility(LinearLayout.VISIBLE);
-                trainerLayout.setVisibility(LinearLayout.GONE);
-                teamDropdown = findViewById(R.id.teamnamePlayer_dropdown);
-                positionDropdown = findViewById(R.id.position_field_dropdown);
-                setupTeamDropdown();
-                setupPositionDropdown();
-            } else if (type.equals("Trainer")) {
-                coachLayout.setVisibility(LinearLayout.GONE);
-                playerLayout.setVisibility(LinearLayout.GONE);
-                trainerLayout.setVisibility(LinearLayout.VISIBLE);
-                teamDropdown = findViewById(R.id.teamnameTrainer_dropdown);
-                setupTeamDropdown();
-            }
-        });
-    }
-
-    void setupButton() {
-        signUpButton = findViewById(R.id.signUpButton);
-        signUpButton.setOnClickListener(view -> {
-            if (verifyInputs()) {
-                progressBar.setVisibility(View.VISIBLE);
-                if (currentType.equals("Coach")) {
-                    db.addCoach(firstName.getText().toString(), lastName.getText().toString(), teamName.getText().toString());
-                } else if (currentType.equals("Player")) {
-                    db.teamsList.get(teamDropdown.getText().toString());
-                    db.addPlayer(firstName.getText().toString(), lastName.getText().toString(), position, number.getText().toString(), db.teamsList.get(teamDropdown.getText().toString()));
-                } else if (currentType.equals("Trainer")) {
-                    db.addTrainer(firstName.getText().toString(), lastName.getText().toString(), db.teamsList.get(teamName.getText().toString()));
-                }
-            }
-        });
-    }
-
+    // To setup the dropdown menu for teams (players and trainers only)
     private void setupTeamDropdown() {
+        teamDropdown = findViewById(R.id.teamnamePlayer_dropdown);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, db.getTeams());
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         teamDropdown.setAdapter(adapter);
-    }
-
-    boolean verifyInputs() {
-        if (TextUtils.isEmpty(firstName.getText()) ||
-                TextUtils.isEmpty(lastName.getText()) ||
-                (TextUtils.isEmpty(teamName.getText()) && TextUtils.isEmpty(teamDropdown.getText()) ||
-                        (currentType.equals("Player") && position == null) ||
-                        TextUtils.isEmpty(number.getText()))) {
-            showToast();
-            return false;
-        } else return true;
-    }
-
-    void showToast() {
-        Toast.makeText(this, "Please fill all required fields", Toast.LENGTH_SHORT).show();
     }
 }

@@ -44,7 +44,7 @@ public class PlayerProfileActivity extends AppCompatActivity {
 
     void goToSettings() {
         Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-        intent.putExtra("pid", playerID);
+        //intent.putExtra("pid", playerID);
         startActivity(intent);
     }
 
