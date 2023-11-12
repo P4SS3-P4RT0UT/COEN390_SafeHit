@@ -7,7 +7,7 @@
     tools:context=".view.SettingsActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar2"
+        android:id="@+id/toolbarSettings"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
@@ -22,7 +22,6 @@
             android:layout_width="250dp"
             android:layout_height="60dp"
             android:layout_marginStart="10dp"
-            android:text="Settings"
             android:textColor="@color/black"
             android:textAlignment="textStart"
             android:textSize="34sp"
