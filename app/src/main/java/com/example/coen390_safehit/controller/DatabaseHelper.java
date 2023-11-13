@@ -5,6 +5,7 @@ import static android.content.ContentValues.TAG;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,6 +13,7 @@ import androidx.annotation.NonNull;
 
 import com.example.coen390_safehit.view.CoachProfileActivity;
 import com.example.coen390_safehit.view.PlayerProfileActivity;
+import com.example.coen390_safehit.view.UpdateInformationActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -41,6 +43,13 @@ public class DatabaseHelper {
     public TextView playerStatus;
     public TextView coachSuggestion;
     public TextView playerName;
+    public TextView firstName;
+    public TextView lastName;
+    public static String userType;
+    public TextView playerNumber;
+    public TextView playerPosition;
+    public TextView playerTeam;
+
     public static String email;
 
     public static synchronized DatabaseHelper getInstance(Context context) {
@@ -176,6 +185,99 @@ public class DatabaseHelper {
     //================================================================================
     // endregion
     //================================================================================
+
+    //================================================================================
+    // region Update Person, Player, Team and Coach from database
+    //================================================================================
+    public void updatePerson(String firstName, String lastName, String uid) {
+        Map<String, String> person = new HashMap<>();
+        person.put("FirstName", firstName);
+        person.put("LastName", lastName);
+
+        db.collection("Person")
+                .document(uid)
+                .update("FirstName", firstName,
+                        "LastName", lastName)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                    }
+                });
+
+    }
+
+    public void updateCoach(String firstName, String lastName, String uid, String teamname) {
+        Map<String, String> person = new HashMap<>();
+        person.put("FirstName", firstName);
+        person.put("LastName", lastName);
+
+        db.collection("Person")
+                .document(uid)
+                .update("FirstName", firstName,
+                        "LastName", lastName)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        addTeams(teamname, uid, new AddCallback() {
+                            @Override
+                            public void onSuccess(String teamID) {
+                                currentTeamID = teamID;
+                                Toast.makeText(currentContext, "Information Updated and Team Added successfully", Toast.LENGTH_SHORT).show();
+                                Intent coachProfile = new Intent(currentContext, CoachProfileActivity.class);
+                                currentContext.startActivity(coachProfile);
+                            }
+                            @Override
+                            public void onFailure(Exception e) {
+                                Toast.makeText(currentContext, "Failed to update information and add team", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+
+                });
+
+
+    }
+
+    public void updatePlayer(String number, String position, String TeamID, String uid) {
+        Map<String, String> person = new HashMap<>();
+        person.put("Number", number);
+        person.put("Position", position);
+        person.put("TeamID", TeamID);
+        db.collection("Players")
+                .whereEqualTo("PID", uid)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                            DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+                            String documentID = documentSnapshot.getId();
+                            db.collection("Players")
+                                    .document(documentID)
+                                    .update("Number", number,
+                                            "Position", position,
+                                            "TeamID", TeamID)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void unused) {
+                                            Toast.makeText(currentContext, "Information Updated successfully", Toast.LENGTH_SHORT).show();
+                                            Intent playerProfile = new Intent(currentContext, PlayerProfileActivity.class);
+                                            currentContext.startActivity(playerProfile);
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Toast.makeText(currentContext, "Failed to update information and add team", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    }
+                });
+    }
+
+
+
 
     //================================================================================
     // region Get Person, Player, Team and Coach from database
@@ -343,8 +445,75 @@ public class DatabaseHelper {
 
         return null;
     }
+    public String getUserTypeFromPlayerID(String personID) {
+        db.collection("Person")
+                .document(personID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            Log.d(TAG, document.getId() + " => " + document.getData());
+                            userType=document.getString("Type");
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
+        return null;
+    }
+    public String getPersonInfoFromPlayerID(String personID) {
+        db.collection("Person")
+                .document(personID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            Log.d(TAG, document.getId() + " => " + document.getData());
+                            firstName.setText(document.getString("FirstName"));
+                            lastName.setText(document.getString("LastName"));
+                            userType=(document.getString("Type"));
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
+        return null;
+    }
+    public String getPlayerInformationFromPlayerID(String personID) {
+        db.collection("Player")
+                .document(personID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            Log.d(TAG, document.getId() + " => " + document.getData());
+                            playerNumber.setText(document.getString("Number"));
+                            playerPosition.setText(document.getString("Position"));
+                            playerTeam.setText(document.getString("TeamID"));
+                          
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
+        return null;
+    }
 
     //================================================================================
     // endregion
     //================================================================================
+    public void updatePlayerName () {
+
+    }
 }
+
+

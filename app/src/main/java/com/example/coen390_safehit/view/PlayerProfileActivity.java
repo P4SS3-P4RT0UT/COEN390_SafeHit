@@ -17,6 +17,9 @@ public class PlayerProfileActivity extends AppCompatActivity {
     DatabaseHelper db = DatabaseHelper.getInstance(this);
     String playerID = DatabaseHelper.personID;
 
+    String userType;
+
+
     // Settings icon
     ImageButton btnSettings;
 
@@ -30,10 +33,12 @@ public class PlayerProfileActivity extends AppCompatActivity {
         db.playerStatus = playerStatus;
         coachSuggestion = findViewById(R.id.textViewDisplaySuggestion);
         db.coachSuggestion = coachSuggestion;
+       // db.userType = userType;
         setupToolbar();
         loadPlayerName();
         loadStatus();
         loadSuggestion();
+        //loadType();
     }
 
     void setupToolbar() {
@@ -44,7 +49,10 @@ public class PlayerProfileActivity extends AppCompatActivity {
 
     void goToSettings() {
         Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-        //intent.putExtra("pid", playerID);
+        intent.putExtra("pid", playerID);
+        intent.putExtra("type","Player");
+       // intent.putExtra("type",userType.toString());
+        startActivity(intent);
         startActivity(intent);
     }
 
@@ -59,6 +67,10 @@ public class PlayerProfileActivity extends AppCompatActivity {
 
     private void loadStatus() {
         db.getStatus(playerID);
+    }
+    private void loadType() {
+        db.getUserTypeFromPlayerID(playerID);
+        userType=db.userType;
     }
 
     private void loadSuggestion() {
