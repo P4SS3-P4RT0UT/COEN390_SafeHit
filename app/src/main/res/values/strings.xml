@@ -20,4 +20,6 @@
     <string name="teamname">Team Name</string>
     <string name="position">Position</string>
     <string name="number">Number</string>
+    <string name="updateinfo">Update User Information</string>
+    <string name="save">Save</string>
 </resources>
