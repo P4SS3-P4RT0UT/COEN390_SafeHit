@@ -178,7 +178,8 @@ public class CoachProfileActivity extends AppCompatActivity {
 
     void goToSettings() {
         Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-        //intent.putExtra("pid", coachID);
+        intent.putExtra("pid", coachID);
+        intent.putExtra("type", "Coach");
         startActivity(intent);
     }
 
