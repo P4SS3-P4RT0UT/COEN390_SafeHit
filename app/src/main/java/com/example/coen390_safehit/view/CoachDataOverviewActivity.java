@@ -1,31 +1,23 @@
 package com.example.coen390_safehit.view;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.coen390_safehit.model.Player;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import com.example.coen390_safehit.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -35,10 +27,12 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 public class CoachDataOverviewActivity extends AppCompatActivity {
-
-
     int hardHitCount = 0;
     int softHitCount = 0;
+
+    Player player;
+
+    TextView positionTextView, numberTextView, suggestionTextView, statusTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,13 +107,14 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
             }
         });
 
-
+        setupData();
         setupToolBar();
+
     }
 
     private void setupToolBar() {
-        Toolbar toolbar = findViewById(R.id.toolbar3);
-        toolbar.setTitle("");
+        Toolbar toolbar = findViewById(R.id.player_data_toolbar);
+        toolbar.setTitle(player.getFirstName() + " " + player.getLastName());
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
@@ -128,6 +123,22 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
         }
 
         toolbar.setNavigationOnClickListener(v -> finish());
+
+    }
+
+    void setupData() {
+        player = CoachProfileActivity.selectedProfile;
+
+        positionTextView = findViewById(R.id.coach_data_position);
+        numberTextView = findViewById(R.id.coach_data_number);
+        suggestionTextView = findViewById(R.id.textViewDisplaySuggestion);
+        statusTextView = findViewById(R.id.textViewDisplayStatus);
+
+        positionTextView.setText(player.getPosition());
+        numberTextView.setText(String.valueOf(player.getNumber()));
+        suggestionTextView.setText(player.getSuggestion());
+        statusTextView.setText(player.getStatus());
+
 
     }
 
@@ -145,10 +156,15 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        dataSet.setValueTextSize(13f);
 
         PieData data = new PieData(dataSet);
         pieChart.setData(data);
         pieChart.setDescription(null);
+        pieChart.setEntryLabelColor(R.color.black);
+
+        pieChart.getLegend().setEnabled(false);
+
         pieChart.invalidate();
     }
 }

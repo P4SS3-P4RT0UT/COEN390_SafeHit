@@ -3,6 +3,7 @@ package com.example.coen390_safehit.view;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -12,8 +13,11 @@ import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.R;
 
 public class PlayerProfileActivity extends AppCompatActivity {
+    public static TextView playerName;
 
-    TextView coachSuggestion, playerStatus, playerName;
+    TextView coachSuggestion, playerStatus;
+    Button dataButton;
+
     DatabaseHelper db = DatabaseHelper.getInstance(this);
     String playerID = DatabaseHelper.personID;
 
@@ -30,6 +34,9 @@ public class PlayerProfileActivity extends AppCompatActivity {
         db.playerStatus = playerStatus;
         coachSuggestion = findViewById(R.id.textViewDisplaySuggestion);
         db.coachSuggestion = coachSuggestion;
+
+        dataButton = findViewById(R.id.dataButton);
+        dataButton.setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), PlayerDataOverviewActivity.class)));
         setupToolbar();
         loadPlayerName();
         loadStatus();

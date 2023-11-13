@@ -17,15 +17,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.R;
+import com.example.coen390_safehit.model.Player;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class CoachProfileActivity extends AppCompatActivity {
     // Layout elements
     private Toolbar toolbar;
-    private ListView playerList;
+    private ListView playerListView;
     private Spinner teamSpinner;
     // Settings icon
     ImageButton btnSettings;
@@ -48,7 +50,7 @@ public class CoachProfileActivity extends AppCompatActivity {
 
         toolbar = findViewById(R.id.toolbar);
         teamSpinner = findViewById(R.id.teamList);
-        playerList = findViewById(R.id.playerList);
+        playerListView = findViewById(R.id.playerList);
 
         loadTeams();
         setupTeamSpinner();
@@ -63,10 +65,10 @@ public class CoachProfileActivity extends AppCompatActivity {
 
     private void setupPlayerList() {
         playerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, playerslist);
-        playerList.setAdapter(playerAdapter);
-        playerList.setOnItemClickListener((adapterView, view, i, l) -> {
-//            String selectedItem = (String) adapterView.getItemAtPosition(position);
-//            selectedProfile = studentMap.get(selectedItem);
+        playerListView.setAdapter(playerAdapter);
+        playerListView.setOnItemClickListener((adapterView, view, position, l) -> {
+            String selectedItem = (String) adapterView.getItemAtPosition(position);
+            selectedProfile = playerHashMap.get(selectedItem);
 
             Intent intent = new Intent(this, CoachDataOverviewActivity.class);
             startActivity(intent);
@@ -84,8 +86,11 @@ public class CoachProfileActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             DocumentSnapshot person = task.getResult();
                             if (person.exists()) {
+                                Player p = new Player(person.getString("Email"), person.getString("FirstName"), person.getString("LastName"), player.getString("PID"), Integer.parseInt(player.getString("Number")), player.getString("Position"), person.getString("Team"), player.getString("Status"), player.getString("Suggestion"));
                                 Log.d("Player", person.getString("FirstName") + " " + person.getString("LastName") + ", " + player.getString("Position") + ", " + player.getString("Number"));
-                                playerslist.add(person.getString("FirstName") + " " + person.getString("LastName") + ", " + player.getString("Position") + ", " + player.getString("Number"));
+                                String playerText = person.getString("FirstName") + " " + person.getString("LastName") + ", " + player.getString("Position") + ", " + player.getString("Number");
+                                playerslist.add(playerText);
+                                playerHashMap.put(playerText, p);
                                 playerAdapter.notifyDataSetChanged();
                             } else {
                                 // Handle the error
@@ -127,6 +132,9 @@ public class CoachProfileActivity extends AppCompatActivity {
         });
     }
 
+    private static HashMap<String, Player> playerHashMap = new HashMap<>();
+    public static Player selectedProfile;
+
 
     private boolean isFirstLoad = true;
 
@@ -153,7 +161,6 @@ public class CoachProfileActivity extends AppCompatActivity {
         });
     }
 
-    //TODO: Switch teams
     private void switchTeams() {
         currentTeamName = teamSpinner.getSelectedItem().toString();
         currentTeamID = db.teamsList.get(currentTeamName);
