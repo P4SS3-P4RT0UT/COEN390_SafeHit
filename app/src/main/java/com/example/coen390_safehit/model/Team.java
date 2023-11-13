@@ -5,7 +5,6 @@ import java.util.List;
 public class Team {
 
     // Attributes
-
     private int tid; // Team ID
     private String name; // Team name
     private List<Player> players; // List of players in the team

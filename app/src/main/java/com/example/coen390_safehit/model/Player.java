@@ -11,11 +11,10 @@ public class Player extends Person {
 
     private String pid; // Player ID
     private int number; // Number
-    private Enum<Position> position; // Position of the field
-    private List<Team> teams; // Team name
-    private DateTime dateOfBirth; // Date of birth
-    private float height; // Player height
-    private float weight; // Player weight
+    private String position; // Position of the field
+    private String team; // Team name
+    private String status;
+    private String suggestion;
 
     // Constructors
 
@@ -23,15 +22,14 @@ public class Player extends Person {
         super();
     }
 
-    public Player(String email, String firstName, String lastName, String pid, int number, Enum<Position> position, List<Team> teams, DateTime dateOfBirth, float height, float weight) {
+    public Player(String email, String firstName, String lastName, String pid, int number, String position, String team, String status, String suggestion) {
         super(email, firstName, lastName);
         this.pid = pid;
         this.number = number;
         this.position = position;
-        this.teams = teams;
-        this.dateOfBirth = dateOfBirth;
-        this.height = height;
-        this.weight = weight;
+        this.team = team;
+        this.status = status;
+        this.suggestion = suggestion;
     }
 
     // Getters and setters
@@ -52,43 +50,36 @@ public class Player extends Person {
         this.number = number;
     }
 
-    public Enum<Position> getPosition() {
+    public String getPosition() {
         return position;
     }
 
-    public void setPosition(Enum<Position> position) {
+    public void setPosition(String position) {
         this.position = position;
     }
 
-    public List<Team> getTeams() {
-        return teams;
+    public String getTeams() {
+        return team;
     }
 
-    public void setTeams(List<Team> teams) {
-        this.teams = teams;
+    public void setTeams(String teams) {
+        this.team = teams;
     }
 
-    public DateTime getDateOfBirth() {
-        return dateOfBirth;
+    public String getStatus() {
+        return status;
     }
 
-    public void setDateOfBirth(DateTime dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public float getHeight() {
-        return height;
+    public String getSuggestion() {
+        return suggestion;
     }
 
-    public void setHeight(float height) {
-        this.height = height;
+    public void setSuggestion(String suggestion) {
+        this.suggestion = suggestion;
     }
 
-    public float getWeight() {
-        return weight;
-    }
-
-    public void setWeight(float weight) {
-        this.weight = weight;
-    }
 }
