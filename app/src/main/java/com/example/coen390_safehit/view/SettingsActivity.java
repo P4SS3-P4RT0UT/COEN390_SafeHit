@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 
 import com.example.coen390_safehit.R;
 
@@ -18,6 +19,8 @@ public class SettingsActivity extends AppCompatActivity {
     // Toolbar for back navigation
     private Toolbar toolbar;
 
+    private Button scan;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,6 +30,16 @@ public class SettingsActivity extends AppCompatActivity {
         // Fetch the id from the previous activity
         uid = getIntent().getStringExtra("pid");
         type= getIntent().getStringExtra("type");
+        scan = findViewById(R.id.scan);
+
+        scan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onAttachDeviceClicked();
+            }
+        });
+
+
     }
 
     public void onLogOutClicked(View view) {
@@ -35,6 +48,10 @@ public class SettingsActivity extends AppCompatActivity {
 
     public void onDeleteAccountClicked(View view) {
         // Delete account from database
+    }
+    public void onAttachDeviceClicked(){
+        Intent intent  = new Intent(getApplicationContext(), ScanningActivity.class);
+        startActivity(intent);
     }
     public void onUpdateInfoClicked(View view) {
         goToPersonalInformation();

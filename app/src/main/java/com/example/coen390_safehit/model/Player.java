@@ -16,6 +16,8 @@ public class Player extends Person {
     private String status;
     private String suggestion;
 
+    private String mac; //should replace the id
+
     // Constructors
 
     public Player() {
@@ -40,6 +42,14 @@ public class Player extends Person {
 
     public void setPid(String pid) {
         this.pid = pid;
+    }
+
+    public String getMac() {
+        return mac;
+    }
+
+    public void setMac(String mac) {
+        this.mac = mac;
     }
 
     public int getNumber() {
