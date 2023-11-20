@@ -11,6 +11,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.example.coen390_safehit.model.Player;
+import com.example.coen390_safehit.view.CoachDataOverviewActivity;
 import com.example.coen390_safehit.view.CoachProfileActivity;
 import com.example.coen390_safehit.view.PlayerProfileActivity;
 import com.example.coen390_safehit.view.UpdateInformationActivity;
@@ -226,6 +228,7 @@ public class DatabaseHelper {
                                 Intent coachProfile = new Intent(currentContext, CoachProfileActivity.class);
                                 currentContext.startActivity(coachProfile);
                             }
+
                             @Override
                             public void onFailure(Exception e) {
                                 Toast.makeText(currentContext, "Failed to update information and add team", Toast.LENGTH_SHORT).show();
@@ -276,7 +279,23 @@ public class DatabaseHelper {
                 });
     }
 
-
+    public void updatePlayerData(Player player, String suggestion, String status) {
+        db.collection("Players")
+                .whereEqualTo("PID", player.getPid())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+                        String documentID = documentSnapshot.getId();
+                        db.collection("Players")
+                                .document(documentID)
+                                .update("Suggestion", suggestion,
+                                        "Status", status)
+                                .addOnSuccessListener(unused -> Toast.makeText(currentContext, "Information Updated successfully", Toast.LENGTH_SHORT).show())
+                                .addOnFailureListener(e -> Toast.makeText(currentContext, "Failed to update information and add team", Toast.LENGTH_SHORT).show());
+                    }
+                });
+    }
 
 
     //================================================================================
@@ -445,6 +464,7 @@ public class DatabaseHelper {
 
         return null;
     }
+
     public String getUserTypeFromPlayerID(String personID) {
         db.collection("Person")
                 .document(personID)
@@ -455,7 +475,7 @@ public class DatabaseHelper {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             Log.d(TAG, document.getId() + " => " + document.getData());
-                            userType=document.getString("Type");
+                            userType = document.getString("Type");
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
@@ -464,6 +484,7 @@ public class DatabaseHelper {
 
         return null;
     }
+
     public String getPersonInfoFromPlayerID(String personID) {
         db.collection("Person")
                 .document(personID)
@@ -476,7 +497,7 @@ public class DatabaseHelper {
                             Log.d(TAG, document.getId() + " => " + document.getData());
                             firstName.setText(document.getString("FirstName"));
                             lastName.setText(document.getString("LastName"));
-                            userType=(document.getString("Type"));
+                            userType = (document.getString("Type"));
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
@@ -485,6 +506,7 @@ public class DatabaseHelper {
 
         return null;
     }
+
     public String getPlayerInformationFromPlayerID(String personID) {
         db.collection("Player")
                 .document(personID)
@@ -498,7 +520,7 @@ public class DatabaseHelper {
                             playerNumber.setText(document.getString("Number"));
                             playerPosition.setText(document.getString("Position"));
                             playerTeam.setText(document.getString("TeamID"));
-                          
+
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
@@ -511,7 +533,7 @@ public class DatabaseHelper {
     //================================================================================
     // endregion
     //================================================================================
-    public void updatePlayerName () {
+    public void updatePlayerName() {
 
     }
 }
