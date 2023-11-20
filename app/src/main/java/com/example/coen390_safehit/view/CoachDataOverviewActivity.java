@@ -2,6 +2,8 @@ package com.example.coen390_safehit.view;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -9,6 +11,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.model.Player;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
@@ -31,14 +34,17 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
     int softHitCount = 0;
 
     Player player;
+    DatabaseHelper database;
 
     TextView positionTextView, numberTextView, suggestionTextView, statusTextView;
+    MenuItem editAction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coach_data_overview);
 
+        database = DatabaseHelper.getInstance(this);
 
         // Get a reference to the 'Hard hit' node
         DatabaseReference hitRef = FirebaseDatabase.getInstance("https://safehit-3da2b-default-rtdb.europe-west1.firebasedatabase.app/")
@@ -124,6 +130,35 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
 
         toolbar.setNavigationOnClickListener(v -> finish());
 
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.edit_action) {
+                switchToEditMode();
+                return true;
+            }
+            return false;
+        });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.coach_data_overview_menu, menu);
+        editAction = menu.findItem(R.id.edit_action);
+        return true;
+    }
+
+    void switchToEditMode() {
+        if (suggestionTextView.isEnabled()) {
+            //edit action change icon
+
+            editAction.setIcon(R.drawable.ic_edit);
+            suggestionTextView.setEnabled(false);
+            statusTextView.setEnabled(false);
+            database.updatePlayerData(player, suggestionTextView.getText().toString(), statusTextView.getText().toString());
+        } else {
+            suggestionTextView.setEnabled(true);
+            statusTextView.setEnabled(true);
+            editAction.setIcon(R.drawable.ic_check);
+        }
     }
 
     void setupData() {
@@ -148,11 +183,9 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
         }
         PieChart pieChart = findViewById(R.id.pie_chart);
 
-        int totalHits = hardHitCount + softHitCount;
-
         ArrayList<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry((float) hardHitCount / totalHits * 100, "Hard Hit"));
-        entries.add(new PieEntry((float) softHitCount / totalHits * 100, "Soft Hit"));
+        entries.add(new PieEntry(hardHitCount, "Hard Hit"));
+        entries.add(new PieEntry(softHitCount, "Soft Hit"));
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
