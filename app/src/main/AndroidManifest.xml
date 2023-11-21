@@ -21,12 +21,6 @@
         android:theme="@style/Theme.COEN390_SafeHit"
         tools:targetApi="31">
         <activity
-            android:name=".view.ScanningActivity"
-            android:exported="false" />
-        <activity
-            android:name=".view.ScanActivity"
-            android:exported="false" />
-        <activity
             android:name=".view.UpdateInformationActivity"
             android:exported="false" />
         <activity
