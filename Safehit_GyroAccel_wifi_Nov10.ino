@@ -50,19 +50,21 @@ unsigned long sendTempPrevMillis = 0;  //for temperature
 
 float Gf_x, Gf_y, Gf_z, Gf_tot;  //G force variables
 float GF_thresh = 1.5;           // soft hit threshold
-float GF_conThresh = 4.0;        //hard hit threshold
+//float GF_conThresh = 4.0;        //hard hit threshold
 float gyro_thresh = 0.1;         //gyroscope threshold
 
 String hit_dir;
+//String macString = " ";
+
 
 bool light_hit(float Gforce) {
-  if ((Gforce >= GF_thresh) && (Gforce < GF_conThresh)) {
+  if (Gforce >= GF_thresh) {
     return true;
   } else {
     return false;
   }
 }
-
+/*
 bool hard_hit(float Gforce) {
   if ((Gforce > GF_thresh) && (Gforce >= GF_conThresh)) {
     return true;
@@ -70,6 +72,7 @@ bool hard_hit(float Gforce) {
     return false;
   }
 }
+*/
 
 String savetime() { //function to retrieve current time
   struct tm timeinfo;
@@ -130,6 +133,9 @@ String savedate() { //function to retrieve current date
   String date = sday + "/" + imonth + "/" + year; //assign date info in print format
   return date;
 }
+
+
+///////////////////////////////SETUP//////////////////////////////////////////////////////////////
 
 void setup(void) {
   //setting baud rate
@@ -197,6 +203,11 @@ void setup(void) {
   uid = auth.token.uid.c_str();
   Serial.print("User UID: ");
   Serial.println(uid);
+
+  Serial.print("ESP Board MAC Address:  ");
+  Serial.println(WiFi.macAddress());
+  
+  //macString = WiFi.macAddress();
 }
 
 void loop() {
@@ -244,19 +255,13 @@ void loop() {
     if (light_hit(Gf_tot) == true) {
       String time = savetime();
       String date = savedate();
-      Firebase.RTDB.pushString(&fbdo, "Time/hit/Soft hit", date + "@" + time + "|" + Gf_tot + "|" + hit_dir);  //print soft hit information
-    }
-
-    if (hard_hit(Gf_tot) == true) {
-      String time = savetime();
-      String date = savedate();
-      Firebase.RTDB.pushString(&fbdo, "Time/hit/Hard hit", date + "@" + time + "|" + Gf_tot + "|" + hit_dir);  //print hard hit information
+      Firebase.RTDB.pushString(&fbdo, "08:D1:F9:A4:F7:38/hit", date + "@" + time + "|" + Gf_tot + "|" + hit_dir);  //print soft hit information
     }
   }
 
   if (Firebase.ready() && (millis() - sendTempPrevMillis > 60000 || sendTempPrevMillis == 0)) {  //get helmet tempterature every minute
     sendTempPrevMillis = millis();
-    Firebase.RTDB.pushFloat(&fbdo, "helmet/temperature", temp.temperature);  //print the helmet temperature
+    Firebase.RTDB.pushFloat(&fbdo, "08:D1:F9:A4:F7:38/temperature", temp.temperature);  //print the helmet temperature
   }
 }  //end loop
 
@@ -268,3 +273,4 @@ void printLocalTime() {  //function to print time to serial monitor
   }
   Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 }
+//Mac address 08:D1:F9:A4:F7:38
