@@ -3,7 +3,6 @@ package com.example.coen390_safehit.view;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,8 +28,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.lang.reflect.Array;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -48,7 +45,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
     private PieChart pieChart;
     private LineChart lineChart, lineChart2;
-    private HashMap<String, Integer> hitCount = new HashMap<>();
+    private HashMap<String, Integer> hitCountHashMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,46 +57,20 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         lineChart = findViewById(R.id.line_chart);
         lineChart2 = findViewById(R.id.line_chart2);
 
-        DatabaseReference directionRef = FirebaseDatabase.getInstance("https://safehit-3da2b-default-rtdb.europe-west1.firebasedatabase.app/")
-                .getReference()
-                .child("Time")
-                .child("Direction");
+        getHitData("Hard hit");
+//        getHitData("Soft hit");
 
-        // Read the data once
-        directionRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot hitSnapshot : dataSnapshot.getChildren()) {
-                        String hitValue = hitSnapshot.getValue(String.class);
-                        hitValue = hitValue.replaceAll("Hit from ", "");
+        setupToolBar();
+    }
 
-                        if (hitValue != null) {
-                            hitCount.put(hitValue, hitCount.getOrDefault(hitValue, 0) + 1);
-                        }
-                    }
 
-                    createBarGraph();
-
-                } else {
-                    // Handle the case where the 'Hard hit' node does not exist or is empty
-                    Log.d("FirebaseData", "No direction hits recorded");
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle the error
-                Log.w("FirebaseData", "Database error: " + databaseError.getMessage());
-            }
-        });
-
-        DatabaseReference hardHit = FirebaseDatabase.getInstance("https://safehit-3da2b-default-rtdb.europe-west1.firebasedatabase.app/")
+    void getHitData(String hitType) {
+        DatabaseReference hitRef = FirebaseDatabase.getInstance("https://safehit-3da2b-default-rtdb.europe-west1.firebasedatabase.app/")
                 .getReference()
                 .child("Time")
                 .child("hit")
-                .child("Hard hit");
-        hardHit.addListenerForSingleValueEvent(new ValueEventListener() {
+                .child(hitType);
+        hitRef.addListenerForSingleValueEvent(new ValueEventListener() {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     // Prepare the date format and calendar instances
@@ -127,6 +98,11 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
                                 String[] parts = hitValue.split("\\|");
                                 Date date = dateFormat.parse(parts[0]);
                                 float gForce = Float.parseFloat(parts[1]);
+                                String direction = parts[2];
+
+                                direction = direction.replaceAll("Hit from ", "");
+                                hitCountHashMap.put(direction, hitCountHashMap.getOrDefault(direction, 0) + 1);
+
 
                                 if (date != null) {
                                     long hitTime = date.getTime();
@@ -155,23 +131,11 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
                             }
                         }
                     }
-
-                    // Create graph for the last week's data
-                    createLastWeekGraph(lastWeekEntries);
-
-                    // Convert hit counts per week to entries and create the 3 months graph
-                    ArrayList<Entry> threeMonthsEntries = new ArrayList<>();
-                    for (Map.Entry<Long, Integer> entry : hitCountsPerWeek.entrySet()) {
-                        threeMonthsEntries.add(new Entry(entry.getKey(), entry.getValue()));
-                    }
-                    createSeasonGraph(threeMonthsEntries);
-
                 } else {
                     // Handle the case where the data does not exist or is empty
                     Log.d("FirebaseData", "No data recorded");
                 }
             }
-
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -179,8 +143,6 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
                 Log.w("FirebaseData", "Database error: " + databaseError.getMessage());
             }
         });
-
-        setupToolBar();
     }
 
     void setupToolBar() {
@@ -194,8 +156,8 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
     void createBarGraph() {
         ArrayList<PieEntry> entries = new ArrayList<>();
-        for (String key : hitCount.keySet()) {
-            entries.add(new PieEntry(hitCount.get(key), key));
+        for (String key : hitCountHashMap.keySet()) {
+            entries.add(new PieEntry(hitCountHashMap.get(key), key));
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "");

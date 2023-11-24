@@ -5,6 +5,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.example.coen390_safehit.R;
@@ -31,12 +32,14 @@ public class SettingsActivity extends AppCompatActivity {
     public void onLogOutClicked(View view) {
         goToSignIn();
     }
+
     public void onDeleteAccountClicked(View view) {
         // Delete account from database
     }
     public void onUpdateInfoClicked(View view) {
         goToPersonalInformation();
     }
+
     private void setupToolBar() {
         toolbar = findViewById(R.id.toolbarSettings);
         toolbar.setTitle("Settings");
@@ -45,9 +48,10 @@ public class SettingsActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        //Return to previous page
-        toolbar.setNavigationOnClickListener(v -> finish());
+        // Redirect user back to their main page
+        toolbar.setNavigationOnClickListener(view -> goBackToMainPage(type, uid));
     }
+
     public void goToSignIn() {
         Intent intent = new Intent(getApplicationContext(), SignIn.class);
         startActivity(intent);
@@ -57,5 +61,25 @@ public class SettingsActivity extends AppCompatActivity {
         intent.putExtra("pid", uid);
         intent.putExtra("type",type);
         startActivity(intent);
+    }
+
+    public void goBackToMainPage(String type, String pid) {
+        switch (type) {
+            // Go back to coach main page
+            case "Coach":
+                Intent coachProfile = new Intent(getApplicationContext(), CoachProfileActivity.class);
+                startActivity(coachProfile);
+                break;
+                // Go back to player main page
+            case "Player":
+                Intent playerProfile = new Intent(getApplicationContext(), PlayerProfileActivity.class);
+                startActivity(playerProfile);
+                break;
+            case "Trainer":
+                // Empty
+                break;
+            default:
+                Log.d("SETTINGS EXCEPTION", "Error trying to go back to user main page");
+        }
     }
 }
