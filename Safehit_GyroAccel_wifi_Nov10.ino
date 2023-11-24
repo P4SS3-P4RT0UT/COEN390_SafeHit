@@ -54,7 +54,7 @@ float GF_thresh = 1.5;           // soft hit threshold
 float gyro_thresh = 0.1;         //gyroscope threshold
 
 String hit_dir;
-//String macString = " ";
+String macString = " ";
 
 
 bool light_hit(float Gforce) {
@@ -207,7 +207,8 @@ void setup(void) {
   Serial.print("ESP Board MAC Address:  ");
   Serial.println(WiFi.macAddress());
   
-  //macString = WiFi.macAddress();
+  macString = WiFi.macAddress();
+  
 }
 
 void loop() {
@@ -252,16 +253,20 @@ void loop() {
     //net Gforce of a hit
     Gf_tot = sqrt((Gf_x * Gf_x) + (Gf_y * Gf_y) + (Gf_z * Gf_z));
 
-    if (light_hit(Gf_tot) == true) {
+      if (light_hit(Gf_tot) == true) {
       String time = savetime();
       String date = savedate();
-      Firebase.RTDB.pushString(&fbdo, "08:D1:F9:A4:F7:38/hit", date + "@" + time + "|" + Gf_tot + "|" + hit_dir);  //print soft hit information
+      String hitpath = macString+"/hit";
+      const char * hitPath = hitpath.c_str();
+      Firebase.RTDB.pushString(&fbdo, hitPath, date + "@" + time + "|" + Gf_tot + "|" + hit_dir);  //print soft hit information
     }
   }
 
   if (Firebase.ready() && (millis() - sendTempPrevMillis > 60000 || sendTempPrevMillis == 0)) {  //get helmet tempterature every minute
     sendTempPrevMillis = millis();
-    Firebase.RTDB.pushFloat(&fbdo, "08:D1:F9:A4:F7:38/temperature", temp.temperature);  //print the helmet temperature
+    String temppath = macString+"/temperature";
+    const char * tempPath = temppath.c_str();
+    Firebase.RTDB.pushFloat(&fbdo, tempPath, temp.temperature);  //print the helmet temperature
   }
 }  //end loop
 
