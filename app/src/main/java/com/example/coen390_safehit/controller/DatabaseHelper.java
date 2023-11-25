@@ -279,7 +279,7 @@ public class DatabaseHelper {
                 });
     }
 
-    public void updatePlayerData(Player player, String suggestion, String status) {
+    public void updatePlayerData(Player player) {
         db.collection("Players")
                 .whereEqualTo("PID", player.getPid())
                 .get()
@@ -289,8 +289,8 @@ public class DatabaseHelper {
                         String documentID = documentSnapshot.getId();
                         db.collection("Players")
                                 .document(documentID)
-                                .update("Suggestion", suggestion,
-                                        "Status", status)
+                                .update("Suggestion", player.getSuggestion(),
+                                        "Status", player.getStatus())
                                 .addOnSuccessListener(unused -> Toast.makeText(currentContext, "Information Updated successfully", Toast.LENGTH_SHORT).show())
                                 .addOnFailureListener(e -> Toast.makeText(currentContext, "Failed to update information and add team", Toast.LENGTH_SHORT).show());
                     }

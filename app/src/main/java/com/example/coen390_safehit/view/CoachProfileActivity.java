@@ -168,7 +168,7 @@ public class CoachProfileActivity extends AppCompatActivity {
     }
 
     private void setupToolBar() {
-        toolbar.setTitle("Coach Profile");
+        toolbar.setTitle("");
         toolbar.setNavigationIcon(null);
         setSupportActionBar(toolbar);
         // Settings icon

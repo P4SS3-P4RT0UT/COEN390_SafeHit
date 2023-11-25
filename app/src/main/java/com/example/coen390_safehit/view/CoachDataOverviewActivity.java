@@ -1,5 +1,6 @@
 package com.example.coen390_safehit.view;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -18,6 +19,7 @@ import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import com.example.coen390_safehit.R;
@@ -28,10 +30,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class CoachDataOverviewActivity extends AppCompatActivity {
     int hardHitCount = 0;
     int softHitCount = 0;
+    int criticalHitCount = 0;
 
     Player player;
     DatabaseHelper database;
@@ -49,51 +53,28 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
         // Get a reference to the 'Hard hit' node
         DatabaseReference hitRef = FirebaseDatabase.getInstance("https://safehit-3da2b-default-rtdb.europe-west1.firebasedatabase.app/")
                 .getReference()
-                .child("Time")
+                .child("08:D1:F9:A4:F7:38")
                 .child("hit");
 
-        DatabaseReference hardHitRef = hitRef.child("Hard hit");
-
         // Read the data once
-        hardHitRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        hitRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot hitSnapshot : dataSnapshot.getChildren()) {
                         String hitValue = hitSnapshot.getValue(String.class);
 
-                        if (hitValue != null) {
-                            hardHitCount++;
-                            Log.d("FirebaseData", "Hard hit value: " + hitValue);
-                        }
-                    }
-
-                    createGraph();
-
-                } else {
-                    // Handle the case where the 'Hard hit' node does not exist or is empty
-                    Log.d("FirebaseData", "No hard hits recorded");
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle the error
-                Log.w("FirebaseData", "Database error: " + databaseError.getMessage());
-            }
-        });
-
-        DatabaseReference softHitRef = hitRef.child("Soft hit");
-
-        softHitRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot hitSnapshot : dataSnapshot.getChildren()) {
-                        String hitValue = hitSnapshot.getValue(String.class);
 
                         if (hitValue != null) {
-                            softHitCount++;
+                            String[] hit = hitValue.split("\\|");
+                            if (Double.parseDouble(hit[1]) < 4) {
+                                softHitCount++;
+                            } else if (Double.parseDouble(hit[1]) < 8) {
+                                hardHitCount++;
+                            } else {
+                                criticalHitCount++;
+                            }
+
                             Log.d("FirebaseData", "Hard hit value: " + hitValue);
                         }
                     }
@@ -118,9 +99,13 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
 
     }
 
+    // vulnerable, concussed, cleared
+
     private void setupToolBar() {
         Toolbar toolbar = findViewById(R.id.player_data_toolbar);
-        toolbar.setTitle(player.getFirstName() + " " + player.getLastName());
+        toolbar.setTitle("");
+        TextView title = (TextView) toolbar.findViewById(R.id.toolbar_title);
+        title.setText(player.getFirstName() + " " + player.getLastName());
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
@@ -153,7 +138,9 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
             editAction.setIcon(R.drawable.ic_edit);
             suggestionTextView.setEnabled(false);
             statusTextView.setEnabled(false);
-            database.updatePlayerData(player, suggestionTextView.getText().toString(), statusTextView.getText().toString());
+            player.setSuggestion(suggestionTextView.getText().toString());
+            player.setStatus(statusTextView.getText().toString());
+            database.updatePlayerData(player);
         } else {
             suggestionTextView.setEnabled(true);
             statusTextView.setEnabled(true);
@@ -174,22 +161,32 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
         suggestionTextView.setText(player.getSuggestion());
         statusTextView.setText(player.getStatus());
 
+        suggestionTextView.setBackgroundResource(android.R.drawable.edit_text);
+        statusTextView.setBackgroundResource(android.R.drawable.edit_text);
+
 
     }
 
     void createGraph() {
-        if (hardHitCount == 0 || softHitCount == 0) {
-            return;
-        }
         PieChart pieChart = findViewById(R.id.pie_chart);
 
         ArrayList<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(hardHitCount, "Hard Hit"));
         entries.add(new PieEntry(softHitCount, "Soft Hit"));
+        entries.add(new PieEntry(hardHitCount, "Hard Hit"));
+        entries.add(new PieEntry(criticalHitCount, "Critical Hit"));
+
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
         dataSet.setValueTextSize(13f);
+
+        dataSet.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                // Assuming you want to show two decimal places
+                return String.format(Locale.ENGLISH, "%.0f", value);
+            }
+        });
 
         PieData data = new PieData(dataSet);
         pieChart.setData(data);

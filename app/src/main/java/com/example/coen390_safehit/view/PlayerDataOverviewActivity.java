@@ -1,8 +1,14 @@
 package com.example.coen390_safehit.view;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.example.coen390_safehit.R;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -28,6 +35,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -45,7 +53,11 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
     private PieChart pieChart;
     private LineChart lineChart, lineChart2;
-    private HashMap<String, Integer> hitCountHashMap = new HashMap<>();
+    private Spinner hitSpinner;
+
+    ArrayList<String> hitCountArrayList = new ArrayList<>();
+    ArrayList<String> lastWeekHitArraylist = new ArrayList();
+    ArrayList<String> seasonHitArrayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,19 +69,48 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         lineChart = findViewById(R.id.line_chart);
         lineChart2 = findViewById(R.id.line_chart2);
 
-        getHitData("Hard hit");
-//        getHitData("Soft hit");
-
+        getHitData();
+        setupSpinner();
         setupToolBar();
     }
 
+    void setupSpinner() {
+        hitSpinner = findViewById(R.id.hit_spinner);
+        ArrayAdapter<String> hitAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new String[]{"Hard hit", "Soft hit", "Critical hit"});
+        hitSpinner.setAdapter(hitAdapter);
+        hitSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                if ("Hard hit".equals(hitSpinner.getSelectedItem().toString())) {
+                    createDirectionGraph(4, 8, "Hard hit");
+                    createSeasonGraph(4, 8, "Hard hit");
+                    createLastWeekGraph(4, 8, "Hard hit");
+                } else if ("Soft hit".equals(hitSpinner.getSelectedItem().toString())) {
+                    createDirectionGraph(0, 4, "Soft hit");
+                    createSeasonGraph(0, 4, "Soft hit");
+                    createLastWeekGraph(0, 4, "Soft hit");
+                } else if ("Critical hit".equals(hitSpinner.getSelectedItem().toString())) {
+                    createDirectionGraph(8, 100, "Critical hit");
+                    createSeasonGraph(8, 100, "Critical hit");
+                    createLastWeekGraph(8, 100, "Critical hit");
+                }
+            }
 
-    void getHitData(String hitType) {
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+        });
+
+
+    }
+
+    void getHitData() {
         DatabaseReference hitRef = FirebaseDatabase.getInstance("https://safehit-3da2b-default-rtdb.europe-west1.firebasedatabase.app/")
                 .getReference()
-                .child("Time")
-                .child("hit")
-                .child(hitType);
+                .child("08:D1:F9:A4:F7:38")
+                .child("hit");
+
         hitRef.addListenerForSingleValueEvent(new ValueEventListener() {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -85,10 +126,8 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
                     long oneWeekAgo = currentTime - oneWeekMillis;
 
                     // Data structures to hold the hit data
-                    ArrayList<Entry> lastWeekEntries = new ArrayList<>();
-                    TreeMap<Long, Integer> hitCountsPerWeek = new TreeMap<>();
 
-                    int hitCount = 0;
+
                     // Process each hit
                     for (DataSnapshot hitSnapshot : dataSnapshot.getChildren()) {
                         String hitValue = hitSnapshot.getValue(String.class);
@@ -101,19 +140,17 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
                                 String direction = parts[2];
 
                                 direction = direction.replaceAll("Hit from ", "");
-                                hitCountHashMap.put(direction, hitCountHashMap.getOrDefault(direction, 0) + 1);
-
+                                hitCountArrayList.add(direction + "|" + gForce);
 
                                 if (date != null) {
                                     long hitTime = date.getTime();
 
                                     // For the last week graph
                                     if (hitTime > oneWeekAgo) {
-                                        hitCount++;
-                                        // Convert date to hours and minutes for the X-axis value
+                                        // Convert date to a float representing minutes since midnight
                                         calendar.setTime(date);
-                                        float time = calendar.get(Calendar.HOUR_OF_DAY) + calendar.get(Calendar.MINUTE) / 60.0f;
-                                        lastWeekEntries.add(new Entry(time, hitCount)); // Add to last week's data
+                                        float time = calendar.get(Calendar.HOUR_OF_DAY) * 60.0f + calendar.get(Calendar.MINUTE);
+                                        lastWeekHitArraylist.add(time + "|" + gForce);
                                     }
 
                                     // For the 3 months graph
@@ -123,7 +160,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
                                         long weekStartMillis = threeMonthsAgo + (weeksSinceStart * oneWeekMillis);
 
                                         // Increment the hit count for the corresponding week
-                                        hitCountsPerWeek.put(weekStartMillis, hitCountsPerWeek.getOrDefault(weekStartMillis, 0) + 1);
+                                        seasonHitArrayList.add(weekStartMillis + "|" + gForce);
                                     }
                                 }
                             } catch (ParseException | NumberFormatException e) {
@@ -131,6 +168,10 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
                             }
                         }
                     }
+
+                    createDirectionGraph(4, 8, "Hard hit");
+                    createSeasonGraph(4, 8, "Hard hit");
+                    createLastWeekGraph(4, 8, "Hard hit");
                 } else {
                     // Handle the case where the data does not exist or is empty
                     Log.d("FirebaseData", "No data recorded");
@@ -146,7 +187,9 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
     }
 
     void setupToolBar() {
-        toolbar.setTitle(PlayerProfileActivity.playerName.getText());
+        toolbar.setTitle("");
+        TextView title = (TextView) toolbar.findViewById(R.id.toolbar_title);
+        title.setText(PlayerProfileActivity.playerName.getText());
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -154,10 +197,21 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(view -> finish());
     }
 
-    void createBarGraph() {
+    void createDirectionGraph(float threshold1, float threshold2, String hitStrength) {
         ArrayList<PieEntry> entries = new ArrayList<>();
-        for (String key : hitCountHashMap.keySet()) {
-            entries.add(new PieEntry(hitCountHashMap.get(key), key));
+        HashMap<String, Float> directionTotals = new HashMap<>();
+
+        for (String key : hitCountArrayList) {
+            String[] hit = key.split("\\|");
+            float force = Float.parseFloat(hit[1]);
+            String direction = hit[0];
+
+            if (force > threshold1 && force < threshold2)
+                directionTotals.put(direction, directionTotals.getOrDefault(direction, 0f) + 1);
+        }
+
+        for (Map.Entry<String, Float> entry : directionTotals.entrySet()) {
+            entries.add(new PieEntry(entry.getValue(), entry.getKey()));
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "");
@@ -180,11 +234,12 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         PieData data = new PieData(dataSet);
         pieChart.setData(data);
         pieChart.setDrawEntryLabels(true);
-        pieChart.setDescription(null);
+        Description description = new Description();
+        description.setText(hitStrength + " rate over time");
+        pieChart.setDescription(description);
         pieChart.setEntryLabelTextSize(10f);
         pieChart.setEntryLabelColor(Color.BLACK);
         pieChart.setExtraOffsets(15, 15, 15, 15);
-
 
         Legend legend = pieChart.getLegend();
         legend.setEnabled(false);
@@ -193,9 +248,28 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         pieChart.invalidate();
     }
 
-    public void createLastWeekGraph(ArrayList<Entry> entries) {
-        Collections.sort(entries, new EntryXComparator());
-        LineDataSet lineDataSet = new LineDataSet(entries, "Hard hit rate over Time");
+    public void createLastWeekGraph(float threshold1, float threshold2, String hitStrength) {
+        ArrayList<Entry> entries = new ArrayList<>();
+        HashMap<Float, Integer> lastWeekHitMap = new HashMap<>();
+
+        int hitCount = 0;
+        for (String key : lastWeekHitArraylist) {
+            String[] hit = key.split("\\|");
+            float force = Float.parseFloat(hit[1]);
+            float time = Float.parseFloat(hit[0]);  // Time in minutes since midnight
+
+            if (force > threshold1 && force < threshold2) {
+                lastWeekHitMap.put(time, hitCount++);
+            }
+        }
+
+        for (Map.Entry<Float, Integer> entry : lastWeekHitMap.entrySet()) {
+            entries.add(new Entry(entry.getKey(), entry.getValue()));  // Use Entry, not PieEntry
+        }
+
+
+        entries.sort(new EntryXComparator());
+        LineDataSet lineDataSet = new LineDataSet(entries, hitStrength + " rate over time");
         lineDataSet.setColor(Color.BLUE);
         lineDataSet.setDrawValues(false);
 
@@ -207,13 +281,13 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
         // Customize the X-axis to show hours and minutes
         XAxis xAxis = lineChart.getXAxis();
+        DecimalFormat decimalFormat = new DecimalFormat("00");
         xAxis.setValueFormatter(new ValueFormatter() {
-            private final DecimalFormat decimalFormat = new DecimalFormat("00");
-
             @Override
             public String getFormattedValue(float value) {
-                int hours = (int) value;
-                int minutes = (int) ((value - hours) * 60);
+                int totalMinutes = (int) value;
+                int hours = totalMinutes / 60;
+                int minutes = totalMinutes % 60;
                 return decimalFormat.format(hours) + ":" + decimalFormat.format(minutes);
             }
         });
@@ -221,12 +295,32 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         lineChart.invalidate(); // Refresh the chart
     }
 
-    void createSeasonGraph(ArrayList<Entry> entries) {
+    void createSeasonGraph(float threshold1, float threshold2, String hitStrength) {
+        ArrayList<Entry> entries = new ArrayList<>();
+
+        TreeMap<Long, Integer> seasonHitTreeMap = new TreeMap<>();
+
+        for (String key : seasonHitArrayList) {
+            String[] hit = key.split("\\|");
+            float force = Float.parseFloat(hit[1]);
+            long time = Long.parseLong(hit[0]);
+
+            if (force > threshold1 && force < threshold2) {
+                seasonHitTreeMap.put(time, seasonHitTreeMap.getOrDefault(time, 0) + 1);
+            }
+        }
+
+        for (Map.Entry<Long, Integer> entry : seasonHitTreeMap.entrySet()) {
+
+            entries.add(new Entry(entry.getKey(), entry.getValue()));
+        }
+
+
         // Sort the entries by the timestamp
         Collections.sort(entries, new EntryXComparator());
 
         // Create the data set and set its properties
-        LineDataSet lineDataSet = new LineDataSet(entries, "Hard hit rate over Time");
+        LineDataSet lineDataSet = new LineDataSet(entries, hitStrength + " rate over Time");
         lineDataSet.setColor(Color.BLUE);
         lineDataSet.setDrawValues(false);  // Don't draw values on the chart
 
@@ -242,9 +336,10 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
             @Override
             public String getFormattedValue(float value) {
-                // Assuming the value is a timestamp in milliseconds
                 long millis = (long) value;
-                return dateFormat.format(new Date(millis));  // Format it as a date
+                String formattedDate = dateFormat.format(new Date(millis));
+                Log.d("ChartDate", "Timestamp: " + millis + ", Date: " + formattedDate);
+                return formattedDate;
             }
         });
 
