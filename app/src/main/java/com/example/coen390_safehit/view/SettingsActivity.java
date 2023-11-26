@@ -1,9 +1,11 @@
 package com.example.coen390_safehit.view;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -48,8 +50,6 @@ public class SettingsActivity extends AppCompatActivity {
                 onAttachDeviceClicked();
             }
         });
-
-
     }
 
     public void onLogOutClicked(View view) {
@@ -59,6 +59,7 @@ public class SettingsActivity extends AppCompatActivity {
     public void onDeleteAccountClicked(View view) {
         // Delete account from database
     }
+  
     public void onAttachDeviceClicked(){
 //        Intent intent  = new Intent(getApplicationContext(), ScanningActivity.class);
 //        startActivity(intent);
@@ -92,6 +93,7 @@ public class SettingsActivity extends AppCompatActivity {
                             Toast.makeText(SettingsActivity.this,"Scanning did not work", Toast.LENGTH_SHORT).show();
                         });
     }
+
     public void onUpdateInfoClicked(View view) {
         goToPersonalInformation();
     }
@@ -99,6 +101,7 @@ public class SettingsActivity extends AppCompatActivity {
     private void setupToolBar() {
         toolbar = findViewById(R.id.toolbarSettings);
         toolbar.setTitle("Settings");
+        toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -112,10 +115,11 @@ public class SettingsActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), SignIn.class);
         startActivity(intent);
     }
+
     public void goToPersonalInformation() {
         Intent intent = new Intent(getApplicationContext(), UpdateInformationActivity.class);
         intent.putExtra("pid", uid);
-        intent.putExtra("type",type);
+        intent.putExtra("type", type);
         startActivity(intent);
     }
 
@@ -126,7 +130,7 @@ public class SettingsActivity extends AppCompatActivity {
                 Intent coachProfile = new Intent(getApplicationContext(), CoachProfileActivity.class);
                 startActivity(coachProfile);
                 break;
-                // Go back to player main page
+            // Go back to player main page
             case "Player":
                 Intent playerProfile = new Intent(getApplicationContext(), PlayerProfileActivity.class);
                 startActivity(playerProfile);

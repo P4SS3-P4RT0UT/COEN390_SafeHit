@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.R;
+import com.example.coen390_safehit.controller.PlayerAdapter;
 import com.example.coen390_safehit.model.Player;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -33,21 +34,22 @@ public class CoachProfileActivity extends AppCompatActivity {
     ImageButton btnSettings;
 
     // Database
-    DatabaseHelper db = DatabaseHelper.getInstance(this);
-    String coachID = DatabaseHelper.personID;
+    DatabaseHelper db;
+    String coachID;
 
     private List<String> teamsList = new ArrayList<>();
     ArrayAdapter<String> teamAdapter;
     private String currentTeamName = null;
     public String currentTeamID = null;
-    private List<String> playerslist = new ArrayList<>();
-    ArrayAdapter<String> playerAdapter;
+    private List<Player> playerslist = new ArrayList<>();
+    PlayerAdapter playerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coach_profile);
-
+        db = DatabaseHelper.getInstance(this);
+        coachID = DatabaseHelper.personID;
         toolbar = findViewById(R.id.toolbar);
         teamSpinner = findViewById(R.id.teamList);
         playerListView = findViewById(R.id.playerList);
@@ -64,11 +66,10 @@ public class CoachProfileActivity extends AppCompatActivity {
     }
 
     private void setupPlayerList() {
-        playerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, playerslist);
+        playerAdapter = new PlayerAdapter(this, playerslist);
         playerListView.setAdapter(playerAdapter);
         playerListView.setOnItemClickListener((adapterView, view, position, l) -> {
-            String selectedItem = (String) adapterView.getItemAtPosition(position);
-            selectedProfile = playerHashMap.get(selectedItem);
+            selectedProfile = (Player) adapterView.getItemAtPosition(position);
 
             Intent intent = new Intent(this, CoachDataOverviewActivity.class);
             startActivity(intent);
@@ -89,7 +90,7 @@ public class CoachProfileActivity extends AppCompatActivity {
                                 Player p = new Player(person.getString("Email"), person.getString("FirstName"), person.getString("LastName"), player.getString("PID"), Integer.parseInt(player.getString("Number")), player.getString("Position"), person.getString("Team"), player.getString("Status"), player.getString("Suggestion"));
                                 Log.d("Player", person.getString("FirstName") + " " + person.getString("LastName") + ", " + player.getString("Position") + ", " + player.getString("Number"));
                                 String playerText = person.getString("FirstName") + " " + person.getString("LastName") + ", " + player.getString("Position") + ", " + player.getString("Number");
-                                playerslist.add(playerText);
+                                playerslist.add(p);
                                 playerHashMap.put(playerText, p);
                                 playerAdapter.notifyDataSetChanged();
                             } else {
@@ -110,6 +111,7 @@ public class CoachProfileActivity extends AppCompatActivity {
     }
 
     private void loadTeams() {
+        teamsList.clear();
         db.getTeamsFromCoachID(coachID, new DatabaseHelper.FetchCallback() {
             @Override
             public void onComplete() {
@@ -140,7 +142,7 @@ public class CoachProfileActivity extends AppCompatActivity {
 
     private void setupTeamSpinner() {
         teamAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_item, teamsList);
-        teamAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        teamAdapter.setDropDownViewResource(R.layout.custom_spinner_item);
         teamSpinner.setAdapter(teamAdapter);
 
         //Once teamSpinner changes run switchTeams()
@@ -168,7 +170,7 @@ public class CoachProfileActivity extends AppCompatActivity {
     }
 
     private void setupToolBar() {
-        toolbar.setTitle("Coach Profile");
+        toolbar.setTitle("");
         toolbar.setNavigationIcon(null);
         setSupportActionBar(toolbar);
         // Settings icon
