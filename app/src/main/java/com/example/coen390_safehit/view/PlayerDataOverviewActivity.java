@@ -4,15 +4,19 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.widget.NestedScrollView;
 
 import com.example.coen390_safehit.R;
 import com.github.mikephil.charting.charts.LineChart;
@@ -35,6 +39,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -53,7 +59,10 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
     private PieChart pieChart;
     private LineChart lineChart, lineChart2;
-    private Spinner hitSpinner;
+    private TextView hitTypeTextView;
+
+    ProgressBar progressBar;
+    NestedScrollView nestedScrollView;
 
     ArrayList<String> hitCountArrayList = new ArrayList<>();
     ArrayList<String> lastWeekHitArraylist = new ArrayList();
@@ -68,41 +77,14 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         pieChart = findViewById(R.id.pie_chart);
         lineChart = findViewById(R.id.line_chart);
         lineChart2 = findViewById(R.id.line_chart2);
+        nestedScrollView = findViewById(R.id.nested_scroll_view);
+
+        hitTypeTextView = findViewById(R.id.hit_textView);
+
+        progressBar = findViewById(R.id.progressBar);
 
         getHitData();
-        setupSpinner();
         setupToolBar();
-    }
-
-    void setupSpinner() {
-        hitSpinner = findViewById(R.id.hit_spinner);
-        ArrayAdapter<String> hitAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new String[]{"Hard hit", "Soft hit", "Critical hit"});
-        hitSpinner.setAdapter(hitAdapter);
-        hitSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                if ("Hard hit".equals(hitSpinner.getSelectedItem().toString())) {
-                    createDirectionGraph(4, 8, "Hard hit");
-                    createSeasonGraph(4, 8, "Hard hit");
-                    createLastWeekGraph(4, 8, "Hard hit");
-                } else if ("Soft hit".equals(hitSpinner.getSelectedItem().toString())) {
-                    createDirectionGraph(0, 4, "Soft hit");
-                    createSeasonGraph(0, 4, "Soft hit");
-                    createLastWeekGraph(0, 4, "Soft hit");
-                } else if ("Critical hit".equals(hitSpinner.getSelectedItem().toString())) {
-                    createDirectionGraph(8, 100, "Critical hit");
-                    createSeasonGraph(8, 100, "Critical hit");
-                    createLastWeekGraph(8, 100, "Critical hit");
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parentView) {
-                // your code here
-            }
-        });
-
-
     }
 
     void getHitData() {
@@ -172,6 +154,10 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
                     createDirectionGraph(4, 8, "Hard hit");
                     createSeasonGraph(4, 8, "Hard hit");
                     createLastWeekGraph(4, 8, "Hard hit");
+                    progressBar.setVisibility(View.GONE);
+                    toolbar.setVisibility(View.VISIBLE);
+                    nestedScrollView.setVisibility(View.VISIBLE);
+
                 } else {
                     // Handle the case where the data does not exist or is empty
                     Log.d("FirebaseData", "No data recorded");
@@ -194,7 +180,37 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.soft_hit) {
+                hitTypeTextView.setText("Soft Hit");
+                createDirectionGraph(0, 4, "Soft hit");
+                createSeasonGraph(0, 4, "Soft hit");
+                createLastWeekGraph(0, 4, "Soft hit");
+                return true;
+            } else if (item.getItemId() == R.id.hard_hit) {
+                hitTypeTextView.setText("Hard Hit");
+                createDirectionGraph(4, 8, "Hard hit");
+                createSeasonGraph(4, 8, "Hard hit");
+                createLastWeekGraph(4, 8, "Hard hit");
+                return true;
+            } else if (item.getItemId() == R.id.critical_hit) {
+                hitTypeTextView.setText("Critical Hit");
+                createDirectionGraph(8, 100, "Critical hit");
+                createSeasonGraph(8, 100, "Critical hit");
+                createLastWeekGraph(8, 100, "Critical hit");
+                return true;
+            }
+            return false;
+        });
+
+
         toolbar.setNavigationOnClickListener(view -> finish());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.player_data_overview_menu, menu);
+        return true;
     }
 
     void createDirectionGraph(float threshold1, float threshold2, String hitStrength) {
@@ -230,13 +246,18 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         dataSet.setValueTextSize(12f);
 
         dataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+        dataSet.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                // Assuming you want to show two decimal places
+                return String.format(Locale.ENGLISH, "%.0f", value);
+            }
+        });
 
         PieData data = new PieData(dataSet);
         pieChart.setData(data);
         pieChart.setDrawEntryLabels(true);
-        Description description = new Description();
-        description.setText(hitStrength + " rate over time");
-        pieChart.setDescription(description);
+        pieChart.setDescription(null);
         pieChart.setEntryLabelTextSize(10f);
         pieChart.setEntryLabelColor(Color.BLACK);
         pieChart.setExtraOffsets(15, 15, 15, 15);

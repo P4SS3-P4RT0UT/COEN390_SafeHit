@@ -42,12 +42,15 @@ public class DatabaseHelper {
     public static String currentTeamID;
     public static String currentTeamName;
     private static Context currentContext;
+
     public TextView playerStatus;
     public TextView coachSuggestion;
     public TextView playerName;
     public TextView firstName;
     public TextView lastName;
+
     public static String userType;
+
     public TextView playerNumber;
     public TextView playerPosition;
     public TextView playerTeam;
@@ -83,6 +86,7 @@ public class DatabaseHelper {
                     public void onSuccess(String teamID) {
                         currentTeamID = teamID;
                         Toast.makeText(currentContext, "Team added successfully", Toast.LENGTH_SHORT).show();
+
                         Intent coachProfile = new Intent(currentContext, CoachProfileActivity.class);
                         currentContext.startActivity(coachProfile);
                     }
@@ -309,6 +313,7 @@ public class DatabaseHelper {
 
     //Returns TeamID and TeamName
     public void getTeamsFromCoachID(String coachID, FetchCallback callback) {
+        teamsList.clear();
         db.collection("Teams")
                 .whereEqualTo("CoachID", coachID)
                 .get()
@@ -361,6 +366,7 @@ public class DatabaseHelper {
 
     public List<String> getTeams() {
         List<String> teams = new ArrayList<>();
+        teams.add("Select a team");
         db.collection("Teams")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {

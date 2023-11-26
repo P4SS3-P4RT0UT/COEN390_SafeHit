@@ -5,8 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/toolbar_dropshadow">
+    android:background="@drawable/background_color">
 
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:backgroundTint="@color/white"
+        android:indeterminate="true"
+        app:layout_anchorGravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/player_data_toolbar"
@@ -15,6 +27,7 @@
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -38,6 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:orientation="horizontal"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/player_data_toolbar">
 
@@ -51,6 +65,7 @@
             android:paddingEnd="0dp"
             android:paddingBottom="10dp"
             android:text="Position: "
+            android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -63,6 +78,7 @@
             android:paddingTop="10dp"
             android:paddingEnd="5dp"
             android:paddingBottom="10dp"
+            android:textColor="@color/white"
             android:textSize="20sp" />
 
         <TextView
@@ -75,6 +91,7 @@
             android:paddingEnd="0dp"
             android:paddingBottom="10dp"
             android:text="#"
+            android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -87,6 +104,7 @@
             android:paddingTop="10dp"
             android:paddingEnd="10dp"
             android:paddingBottom="10dp"
+            android:textColor="@color/white"
             android:textSize="20sp" />
 
     </LinearLayout>
@@ -97,8 +115,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="30dp"
-
         android:layout_marginEnd="20dp"
+        android:visibility="gone"
+
         app:cardCornerRadius="16dp"
         app:cardElevation="16dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -109,6 +128,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
 
+            android:background="@drawable/card_background_color"
             android:padding="8dp">
 
             <TextView
@@ -118,6 +138,7 @@
                 android:layout_marginStart="50dp"
                 android:layout_marginEnd="50dp"
                 android:text="Player Status"
+                android:textColor="@color/white"
                 android:textSize="24sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -127,22 +148,22 @@
                 android:id="@+id/textViewDisplayStatus"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:enabled="false"
-                android:textAlignment="center"
-                android:textColor="@color/black"
+                android:layout_marginBottom="10dp"
                 android:background="@null"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789"
+                android:enabled="false"
+                android:hint="Current Player Status"
                 android:maxLength="25"
                 android:padding="10dp"
-                android:layout_marginBottom="10dp"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="24sp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="16dp"
-                android:hint="Current Player Status"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewStatus"
-                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewStatus" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
@@ -154,6 +175,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="30dp"
         android:layout_marginEnd="20dp"
+        android:visibility="gone"
         app:cardCornerRadius="16dp"
         app:cardElevation="16dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -163,6 +185,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/card_background_color"
             android:padding="8dp">
 
             <TextView
@@ -172,31 +195,32 @@
                 android:layout_marginStart="50dp"
                 android:layout_marginEnd="50dp"
                 android:text="Suggestion"
+                android:textColor="@color/white"
                 android:textSize="24sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <EditText
-                android:background="@null"
                 android:id="@+id/textViewDisplaySuggestion"
                 android:layout_width="300dp"
-                android:padding="10dp"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:textColor="@color/black"
+                android:layout_marginBottom="10dp"
+                android:background="@null"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 123456789"
                 android:enabled="false"
+                android:hint="Suggestion for player"
                 android:maxLength="25"
+                android:padding="10dp"
                 android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="24sp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="16dp"
-                android:hint="Suggestion for player"
-                android:layout_marginBottom="10dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textViewSuggestion"
-                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 123456789" />
+                app:layout_constraintTop_toBottomOf="@id/textViewSuggestion" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
@@ -209,6 +233,7 @@
         android:layout_marginTop="30dp"
 
         android:layout_marginEnd="20dp"
+        android:visibility="gone"
         app:cardCornerRadius="16dp"
         app:cardElevation="16dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -219,6 +244,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
 
+            android:background="@drawable/card_background_color"
             android:padding="8dp">
 
             <TextView
@@ -228,6 +254,7 @@
                 android:layout_marginStart="50dp"
                 android:layout_marginEnd="50dp"
                 android:text="Player Data"
+                android:textColor="@color/white"
                 android:textSize="24sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -248,5 +275,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

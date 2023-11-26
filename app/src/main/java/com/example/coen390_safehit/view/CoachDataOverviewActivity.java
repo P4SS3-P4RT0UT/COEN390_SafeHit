@@ -5,12 +5,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 
 import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.model.Player;
@@ -40,8 +44,15 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
     Player player;
     DatabaseHelper database;
 
+
     TextView positionTextView, numberTextView, suggestionTextView, statusTextView;
     MenuItem editAction;
+
+    ProgressBar progressBar;
+    Toolbar toolbar;
+    LinearLayout linearLayout;
+    CardView cardViewPlayerStatus, cardViewPlayerSuggestion, cardViewPlayerData;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +90,14 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
                         }
                     }
 
+                    progressBar.setVisibility(View.GONE);
+                    toolbar.setVisibility(View.VISIBLE);
+                    linearLayout.setVisibility(View.VISIBLE);
+                    cardViewPlayerData.setVisibility(View.VISIBLE);
+                    cardViewPlayerSuggestion.setVisibility(View.VISIBLE);
+                    cardViewPlayerStatus.setVisibility(View.VISIBLE);
                     createGraph();
+
 
                 } else {
                     // Handle the case where the 'Hard hit' node does not exist or is empty
@@ -102,7 +120,7 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
     // vulnerable, concussed, cleared
 
     private void setupToolBar() {
-        Toolbar toolbar = findViewById(R.id.player_data_toolbar);
+        toolbar = findViewById(R.id.player_data_toolbar);
         toolbar.setTitle("");
         TextView title = (TextView) toolbar.findViewById(R.id.toolbar_title);
         title.setText(player.getFirstName() + " " + player.getLastName());
@@ -151,10 +169,17 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
     void setupData() {
         player = CoachProfileActivity.selectedProfile;
 
+
+        progressBar = findViewById(R.id.progressBar);
         positionTextView = findViewById(R.id.coach_data_position);
         numberTextView = findViewById(R.id.coach_data_number);
         suggestionTextView = findViewById(R.id.textViewDisplaySuggestion);
         statusTextView = findViewById(R.id.textViewDisplayStatus);
+
+        linearLayout = findViewById(R.id.linearLayout2);
+        cardViewPlayerData = findViewById(R.id.cardViewPlayerData);
+        cardViewPlayerSuggestion = findViewById(R.id.cardViewSuggestion);
+        cardViewPlayerStatus = findViewById(R.id.cardViewPlayerStatus);
 
         positionTextView.setText(player.getPosition());
         numberTextView.setText(String.valueOf(player.getNumber()));

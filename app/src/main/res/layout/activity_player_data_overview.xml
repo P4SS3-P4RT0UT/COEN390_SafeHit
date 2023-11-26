@@ -4,22 +4,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/background_color">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
         android:id="@+id/loadingLayout"
         android:gravity="center">
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true" />
     </FrameLayout>
 
     <androidx.appcompat.widget.Toolbar
+        android:visibility="gone"
         android:id="@+id/player_data_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -45,6 +42,8 @@
 
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/nested_scroll_view"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
@@ -56,14 +55,17 @@
             android:orientation="vertical">
 
 
-            <Spinner
-                android:id="@+id/hit_spinner"
-                android:layout_width="200dp"
-                android:layout_height="50dp"
+            <TextView
+                android:id="@+id/hit_textView"
+                android:text="Hard Hit"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:background="@drawable/spinner_layer_data" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardViewPlayerData"
@@ -77,7 +79,7 @@
                 app:cardElevation="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/hit_spinner">
+                app:layout_constraintTop_toBottomOf="@+id/hit_textView">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -214,7 +216,15 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
-    <!-- This is a simplified example. Add this to your activity's layout XML -->
+
+    <ProgressBar
+        android:backgroundTint="@color/white"
+        android:id="@+id/progressBar"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:indeterminate="true"
+        app:layout_anchor="@+id/loadingLayout"
+        app:layout_anchorGravity="center" />
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
