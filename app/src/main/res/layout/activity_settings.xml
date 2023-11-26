@@ -85,17 +85,20 @@
 
     <Button
         android:id="@+id/scan"
-        android:layout_width="206dp"
-        android:layout_height="wrap_content"
+        android:layout_width="301dp"
+        android:layout_height="51dp"
+        android:layout_below="@+id/UpdateInfo"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="23dp"
-        android:layout_marginTop="403dp"
-        android:layout_marginEnd="182dp"
-        android:layout_marginBottom="253dp"
-        android:text="Connect to a device" />
+        android:layout_marginStart="55dp"
+        android:layout_marginTop="19dp"
+        android:layout_marginEnd="55dp"
+        android:layout_marginBottom="274dp"
+        android:background="@color/cardview_shadow_end_color"
+        android:text="Connect to a device"
+        android:textColor="@color/black"
+        android:textSize="20dp" />
 
 
 </RelativeLayout>
