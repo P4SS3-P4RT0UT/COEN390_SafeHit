@@ -12,10 +12,10 @@
     <string name="lastname">Last Name</string>
     <string name="personType">Type</string>
     <string-array name="personType">
-        <item>None</item>
+        <item>Select Type</item>
         <item>Player</item>
         <item>Coach</item>
-        <item>Trainer</item>
+        <!--        <item>Trainer</item>-->
     </string-array>
     <string name="teamname">Team Name</string>
     <string name="position">Position</string>

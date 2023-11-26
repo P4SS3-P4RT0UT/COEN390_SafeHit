@@ -6,6 +6,9 @@
     android:layout_height="match_parent"
     tools:context=".view.SettingsActivity">
 
+
+
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbarSettings"
         android:layout_width="fill_parent"
@@ -44,35 +47,58 @@
         android:id="@+id/logOut"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Log out"
-        android:textSize="24sp"
         android:layout_below="@+id/settingsOptions"
-        android:clickable="true"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="50dp"
+        android:clickable="true"
+        android:minHeight="48dp"
         android:onClick="onLogOutClicked"
-        android:layout_marginStart="20dp"/>
+        android:text="Log out"
+        android:textSize="24sp" />
 
     <TextView
         android:id="@+id/DeleteAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Delete account"
-        android:textSize="24sp"
         android:layout_below="@+id/logOut"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="30dp"
         android:clickable="true"
+        android:minHeight="48dp"
         android:onClick="onDeleteAccountClicked"
-        android:layout_marginStart="20dp"/>
+        android:text="Delete account"
+        android:textSize="24sp" />
+
     <TextView
         android:id="@+id/UpdateInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Update personal information"
-        android:textSize="24sp"
         android:layout_below="@+id/DeleteAccount"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="30dp"
         android:clickable="true"
+        android:minHeight="48dp"
         android:onClick="onUpdateInfoClicked"
-        android:layout_marginStart="20dp"/>
+        android:text="Update personal information"
+        android:textSize="24sp" />
+
+
+    <Button
+        android:id="@+id/scan"
+        android:layout_width="301dp"
+        android:layout_height="51dp"
+        android:layout_below="@+id/UpdateInfo"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="55dp"
+        android:layout_marginTop="19dp"
+        android:layout_marginEnd="55dp"
+        android:layout_marginBottom="274dp"
+        android:background="@color/cardview_shadow_end_color"
+        android:text="Connect to a device"
+        android:textColor="@color/black"
+        android:textSize="20dp" />
+
 
 </RelativeLayout>

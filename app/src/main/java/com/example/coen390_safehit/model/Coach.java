@@ -6,7 +6,6 @@ import java.util.List;
 public class Coach extends Person {
 
     // Attributes
-
     int cid; // Coach ID
     String title; // Official title
     List<Team> teams; // Associated team(s)
