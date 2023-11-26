@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public enum Position {
-    NONE("Select a position"),
     QB("Quarterback"),
     RB("Running Back"),
     FB("Fullback"),
@@ -40,7 +39,7 @@ public enum Position {
     public static String[] getPositionList() {
         Position[] positions = Position.values();
         String[] positionsToString = new String[positions.length];
-        for (int i = 0; i < positions.length; i++) {
+        for(int i = 0; i < positions.length; i++) {
             positionsToString[i] = positions[i].getPosition();
         }
         return positionsToString;
