@@ -11,5 +11,6 @@
         android:startColor="#55BB95"
         android:type="linear"
         android:endColor="#265959"
-        android:angle="240" />
+        android:angle="225" />  <!-- changed from 240 to 225, app doesnt crash anymore. apparently must be a multiple of 45 -->
 </shape>
+
