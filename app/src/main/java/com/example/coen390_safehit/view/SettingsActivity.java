@@ -7,8 +7,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.coen390_safehit.R;
+import com.example.coen390_safehit.model.Player;
+import com.google.mlkit.vision.barcode.common.Barcode;
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanner;
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions;
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -17,6 +25,10 @@ public class SettingsActivity extends AppCompatActivity {
     private String type;
     // Toolbar for back navigation
     private Toolbar toolbar;
+
+    private Button scan;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +39,17 @@ public class SettingsActivity extends AppCompatActivity {
         // Fetch the id from the previous activity
         uid = getIntent().getStringExtra("pid");
         type= getIntent().getStringExtra("type");
+        scan = findViewById(R.id.scan);
+
+
+        scan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onAttachDeviceClicked();
+            }
+        });
+
+
     }
 
     public void onLogOutClicked(View view) {
@@ -35,6 +58,39 @@ public class SettingsActivity extends AppCompatActivity {
 
     public void onDeleteAccountClicked(View view) {
         // Delete account from database
+    }
+    public void onAttachDeviceClicked(){
+//        Intent intent  = new Intent(getApplicationContext(), ScanningActivity.class);
+//        startActivity(intent);
+        GmsBarcodeScannerOptions options = new GmsBarcodeScannerOptions.Builder()
+                .setBarcodeFormats(
+                        Barcode.FORMAT_QR_CODE,
+                        Barcode.FORMAT_AZTEC)
+                .build();
+
+        GmsBarcodeScanner scanner = GmsBarcodeScanning.getClient(this);
+
+        scanner
+                .startScan()
+                .addOnSuccessListener(
+                        barcode -> {
+                            // Task completed successfully
+                            String rawValue = barcode.getRawValue();
+                            Player player = new Player();
+                            player.setMac(rawValue);
+                            Toast.makeText(SettingsActivity.this, "The device is connected", Toast.LENGTH_SHORT).show();
+
+                        })
+                .addOnCanceledListener(
+                        () -> {
+                            // Task canceled
+                        })
+                .addOnFailureListener(
+                        e -> {
+                            // Task failed with an exception
+                            Log.d("SETTINGS EXCEPTION", "Error ");
+                            Toast.makeText(SettingsActivity.this,"Scanning did not work", Toast.LENGTH_SHORT).show();
+                        });
     }
     public void onUpdateInfoClicked(View view) {
         goToPersonalInformation();
