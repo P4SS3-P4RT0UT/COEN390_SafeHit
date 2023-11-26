@@ -39,7 +39,7 @@ public class SignUp extends AppCompatActivity {
 
     void setupEditTextFields() {
         email = findViewById(R.id.editTextSignUpEmail);
-        password = findViewById(R.id.editTextSignUpPassword);
+        password = findViewById(R.id.FirstNameField);
     }
 
     void setupButtons() {
@@ -47,7 +47,6 @@ public class SignUp extends AppCompatActivity {
         signUp.setOnClickListener(view -> {
             if (validEmailAndPassword()) {
                 progressBar.setVisibility(View.VISIBLE);
-                signUp.setVisibility(View.GONE);
                 mAuth.createUserWithEmailAndPassword(String.valueOf(email.getText()), String.valueOf(password.getText()))
                         .addOnCompleteListener(this, task -> {
                             progressBar.setVisibility(View.GONE);
@@ -58,7 +57,6 @@ public class SignUp extends AppCompatActivity {
                                 //Go to the next page for sign up information
                                 goToSignUpInformation();
                             } else {
-                                signUp.setVisibility(View.VISIBLE);
                                 // If sign in fails, display a message to the user.
                                 Toast.makeText(SignUp.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();

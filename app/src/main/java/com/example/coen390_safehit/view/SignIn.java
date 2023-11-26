@@ -61,25 +61,16 @@ public class SignIn extends AppCompatActivity {
         signIn.setOnClickListener(view -> {
             if (validEmailAndPassword()) {
                 progressBar.setVisibility(View.VISIBLE);
-                email.setEnabled(false);
-                password.setEnabled(false);
-                signIn.setVisibility(View.GONE);
-                createAccount.setVisibility(View.GONE);
                 // Connect to account
-                mAuth.signInWithEmailAndPassword(email.getText().toString().toLowerCase(), String.valueOf(password.getText()))
+                mAuth.signInWithEmailAndPassword(String.valueOf(email.getText()), String.valueOf(password.getText()))
                         .addOnCompleteListener(this, task -> {
                             progressBar.setVisibility(View.GONE);
-
                             if (task.isSuccessful()) {
                                 // Sign in success, update UI with the signed-in user's information
                                 Toast.makeText(SignIn.this, "Sign in successful", Toast.LENGTH_SHORT).show();
                                 checkDatabase();
                             } else {
                                 // If sign in fails, display a message to the user
-                                signIn.setVisibility(View.VISIBLE);
-                                createAccount.setVisibility(View.VISIBLE);
-                                email.setEnabled(true);
-                                password.setEnabled(true);
                                 Toast.makeText(SignIn.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
                             }
@@ -95,7 +86,7 @@ public class SignIn extends AppCompatActivity {
 
     void checkDatabase() {
         DatabaseHelper db = DatabaseHelper.getInstance(this);
-        db.getPersonFromEmail(email.getText().toString().toLowerCase(), new DatabaseHelper.FetchCallback() {
+        db.getPersonFromEmail(email.getText().toString(), new DatabaseHelper.FetchCallback() {
             @Override
             public void onComplete() {
                 if (DatabaseHelper.personType.equals("Coach") || DatabaseHelper.personType.equals("Trainer"))

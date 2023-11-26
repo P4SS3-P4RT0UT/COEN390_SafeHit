@@ -6,13 +6,11 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.coen390_safehit.controller.DatabaseHelper;
@@ -20,10 +18,9 @@ import com.example.coen390_safehit.R;
 import com.example.coen390_safehit.model.Position;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.util.List;
-
 public class SignUpInformation extends AppCompatActivity {
-    Spinner typeDropdown, teamDropdown, positionDropdown, teamDropdownTrainer;
+
+    AutoCompleteTextView typeDropdown, teamDropdown, positionDropdown;
 
     LinearLayout coachLayout, playerLayout, trainerLayout;
     Button signUpButton;
@@ -75,49 +72,36 @@ public class SignUpInformation extends AppCompatActivity {
     private void setupTypeDropdown() {
         // Create type dropdown menu
         typeDropdown = findViewById(R.id.type_dropdown);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.personType, R.layout.spinner_item);
-        adapter.setDropDownViewResource(R.layout.spinner_item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.personType, android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         typeDropdown.setAdapter(adapter);
 
         // Get user type selection
-        typeDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                String type = typeDropdown.getSelectedItem().toString();
-                currentType = type;
-                // Set the layout visibility according to the type selection
-                if (type.equals("Select Type")) {
-                    // Hide all layouts
-                    coachLayout.setVisibility(LinearLayout.GONE);
-                    playerLayout.setVisibility(LinearLayout.GONE);
-                    trainerLayout.setVisibility(LinearLayout.GONE);
-                } else if (type.equals("Coach")) {
-                    // Show coach layout and enable fields specific to user type
-                    coachLayout.setVisibility(LinearLayout.VISIBLE);
-                    enableCoachReservedFields();
-                    // Hide other layouts
-                    playerLayout.setVisibility(LinearLayout.GONE);
-                    trainerLayout.setVisibility(LinearLayout.GONE);
-                } else if (type.equals("Player")) {
-                    // Show player layout and enable fields specific to user type
-                    playerLayout.setVisibility(LinearLayout.VISIBLE);
-                    enablePlayerReservedFields();
-                    // Hide other layouts
-                    coachLayout.setVisibility(LinearLayout.GONE);
-                    trainerLayout.setVisibility(LinearLayout.GONE);
-                } else if (type.equals("Trainer")) {
-                    // Show trainer layout and enable fields specific to user type
-                    trainerLayout.setVisibility(LinearLayout.VISIBLE);
-                    enableTrainerReservedFields();
-                    // Hide other layouts
-                    coachLayout.setVisibility(LinearLayout.GONE);
-                    playerLayout.setVisibility(LinearLayout.GONE);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parentView) {
-                // your code here
+        typeDropdown.setOnItemClickListener((adapterView, view, i, l) -> {
+            String type = adapterView.getItemAtPosition(i).toString();
+            currentType = type;
+            // Set the layout visibility according to the type selection
+            if (type.equals("Coach")) {
+                // Show coach layout and enable fields specific to user type
+                coachLayout.setVisibility(LinearLayout.VISIBLE);
+                enableCoachReservedFields();
+                // Hide other layouts
+                playerLayout.setVisibility(LinearLayout.GONE);
+                trainerLayout.setVisibility(LinearLayout.GONE);
+            } else if (type.equals("Player")) {
+                // Show player layout and enable fields specific to user type
+                playerLayout.setVisibility(LinearLayout.VISIBLE);
+                enablePlayerReservedFields();
+                // Hide other layouts
+                coachLayout.setVisibility(LinearLayout.GONE);
+                trainerLayout.setVisibility(LinearLayout.GONE);
+            } else if (type.equals("Trainer")) {
+                // Show trainer layout and enable fields specific to user type
+                trainerLayout.setVisibility(LinearLayout.VISIBLE);
+                enableTrainerReservedFields();
+                // Hide other layouts
+                coachLayout.setVisibility(LinearLayout.GONE);
+                playerLayout.setVisibility(LinearLayout.GONE);
             }
         });
     }
@@ -127,10 +111,8 @@ public class SignUpInformation extends AppCompatActivity {
         // Setup the sign up button
         signUpButton = findViewById(R.id.signUpButton);
         signUpButton.setOnClickListener(view -> {
-            progressBar.setVisibility(View.VISIBLE);
-            signUpButton.setVisibility(View.GONE);
             // Check for valid inputs
-            if (validUserInput()) {
+            if(validUserInput()) {
                 // Show progress bar
                 progressBar.setVisibility(View.VISIBLE);
                 // Add the user to the database
@@ -139,20 +121,15 @@ public class SignUpInformation extends AppCompatActivity {
                         db.addCoach(firstName.getText().toString(), lastName.getText().toString(), teamName.getText().toString());
                         break;
                     case "Player":
-                        db.teamsList.get(teamDropdown.getSelectedItem().toString());
-                        db.addPlayer(firstName.getText().toString(), lastName.getText().toString(), positionDropdown.getSelectedItem().toString(), number.getText().toString(), db.teamsList.get(teamDropdown.getSelectedItem().toString()));
+                        db.teamsList.get(teamDropdown.getText().toString());
+                        db.addPlayer(firstName.getText().toString(), lastName.getText().toString(), positionDropdown.getText().toString(), number.getText().toString(), db.teamsList.get(teamDropdown.getText().toString()));
                         break;
                     case "Trainer":
                         db.addTrainer(firstName.getText().toString(), lastName.getText().toString(), db.teamsList.get(teamName.getText().toString()));
                         break;
                     default:
-                        progressBar.setVisibility(View.GONE);
-                        signUpButton.setVisibility(View.VISIBLE);
                         Log.d("SIGN UP EXCEPTION", "Error trying to determine user type (setupSignUpButton())");
                 }
-            } else {
-                progressBar.setVisibility(View.GONE);
-                signUpButton.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -160,40 +137,33 @@ public class SignUpInformation extends AppCompatActivity {
     // To check if all user inputs are valid
     public boolean validUserInput() {
         // For all user types, check first name, last name, and user type
-        if (TextUtils.isEmpty(firstName.getText()) || TextUtils.isEmpty(lastName.getText()) || TextUtils.isEmpty(currentType)) {
+        if(TextUtils.isEmpty(firstName.getText()) || TextUtils.isEmpty(lastName.getText()) || TextUtils.isEmpty(currentType)) {
             showToast("Please fill all required fields");
             return false;
         }
-        switch (currentType) {
+        switch(currentType) {
             case "Coach":
                 // Check for team name
-                if (TextUtils.isEmpty(teamName.getText())) {
+                if(TextUtils.isEmpty(teamName.getText())) {
                     showToast("Please enter a team name");
                     return false;
                 }
                 break;
             case "Player":
                 // Check for team name, position, and number
-                if (TextUtils.isEmpty(teamDropdown.getSelectedItem().toString()) || TextUtils.isEmpty(number.getText())) {
+                if(TextUtils.isEmpty(teamDropdown.getText()) || TextUtils.isEmpty(positionDropdown.getText()) || TextUtils.isEmpty(number.getText())) {
                     showToast("Please fill all required fields");
-                    return false;
-                } else if (teamDropdown.getSelectedItem().toString().equals("Select a team")) {
-                    showToast("Please select a team");
-                    return false;
-                } else if (TextUtils.isEmpty(positionDropdown.getSelectedItem().toString()) || positionDropdown.getSelectedItem().toString().equals("Select a position")) {
-                    showToast("Please select a position");
                     return false;
                 }
                 break;
             case "Trainer":
                 // Check for team name
-                if (TextUtils.isEmpty(teamDropdown.getSelectedItem().toString())) {
-                    showToast("Please select a team");
+                if(TextUtils.isEmpty(teamDropdown.getText())) {
+                    showToast("Please select a team from the dropdown menu");
                     return false;
                 }
                 break;
             default:
-                showToast("Please select user type");
                 Log.d("SIGN UP EXCEPTION", "Error trying to determine user type (verifyInputs())");
                 return false;
         }
@@ -229,24 +199,19 @@ public class SignUpInformation extends AppCompatActivity {
     // To setup the dropdown for a player's position (players only)
     private void setupPositionDropdown() {
         positionDropdown = findViewById(R.id.position_field_dropdown);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, Position.getPositionList());
-        adapter.setDropDownViewResource(R.layout.spinner_item);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, Position.getPositionList());
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         positionDropdown.setAdapter(adapter);
+        positionDropdown.setOnItemClickListener((adapterView, view, i, l) -> {
+            position = adapterView.getItemAtPosition(i).toString();
+        });
     }
 
     // To setup the dropdown menu for teams (players and trainers only)
     private void setupTeamDropdown() {
         teamDropdown = findViewById(R.id.teamnamePlayer_dropdown);
-
-        // Fetch the team data
-        List<String> teams = db.getTeams();
-
-        // Create the adapter with the fetched data
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, teams);
-        adapter.setDropDownViewResource(R.layout.spinner_item);
-
-        // Set the adapter to the spinner
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, db.getTeams());
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         teamDropdown.setAdapter(adapter);
     }
-
 }
