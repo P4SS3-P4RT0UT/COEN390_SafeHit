@@ -125,6 +125,8 @@ public class CoachProfileActivity extends AppCompatActivity {
                 });
 
                 teamAdapter.notifyDataSetChanged();
+                DatabaseHelper.currentTeamID = db.teamsList.get(currentTeamName);
+                DatabaseHelper.currentTeamName = currentTeamName;
                 loadPlayers();
             }
 
@@ -142,9 +144,10 @@ public class CoachProfileActivity extends AppCompatActivity {
     private boolean isFirstLoad = true;
 
     private void setupTeamSpinner() {
-        teamAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_item, teamsList);
-        teamAdapter.setDropDownViewResource(R.layout.custom_spinner_item);
+        teamAdapter = new ArrayAdapter<>(this, R.layout.spinner_item_coach, teamsList);
+        teamAdapter.setDropDownViewResource(R.layout.spinner_item_coach);
         teamSpinner.setAdapter(teamAdapter);
+
 
         //Once teamSpinner changes run switchTeams()
         teamSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

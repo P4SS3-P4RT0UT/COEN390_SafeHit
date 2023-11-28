@@ -252,20 +252,17 @@ public class DatabaseHelper {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
-                        addTeams(teamname, uid, new AddCallback() {
-                            @Override
-                            public void onSuccess(String teamID) {
-                                currentTeamID = teamID;
-                                Toast.makeText(currentContext, "Information Updated and Team Added successfully", Toast.LENGTH_SHORT).show();
-                                Intent coachProfile = new Intent(currentContext, CoachProfileActivity.class);
-                                currentContext.startActivity(coachProfile);
-                            }
-
-                            @Override
-                            public void onFailure(Exception e) {
-                                Toast.makeText(currentContext, "Failed to update information and add team", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                        db.collection("Teams")
+                                .document(currentTeamID)
+                                .update("TeamName", teamname)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+                                        Toast.makeText(currentContext, "Information Updated successfully", Toast.LENGTH_SHORT).show();
+                                        Intent coachProfile = new Intent(currentContext, CoachProfileActivity.class);
+                                        currentContext.startActivity(coachProfile);
+                                    }
+                                });
                     }
 
                 });
@@ -368,6 +365,9 @@ public class DatabaseHelper {
 
     //Returns TeamID and TeamName
     public void getTeamsFromCoachID(String coachID, FetchCallback callback) {
+        if (coachID == null)
+            return;
+        
         teamsList.clear();
         db.collection("Teams")
                 .whereEqualTo("CoachID", coachID)
@@ -398,6 +398,9 @@ public class DatabaseHelper {
 
     //Returns PlayerID
     public String getPlayersFromTeamID(String teamID, FetchCallback callback) {
+        if (teamID == null)
+            return null;
+
         db.collection("Players")
                 .whereEqualTo("TeamID", teamID)
                 .get()
@@ -446,6 +449,9 @@ public class DatabaseHelper {
 
 
     public void getPersonFromEmail(String email, FetchCallback callback) {
+        if (email == null)
+            return;
+
         db.collection("Person")
                 .whereEqualTo("Email", email)
                 .get()
@@ -467,6 +473,9 @@ public class DatabaseHelper {
     }
 
     public String getStatus(String personID) {
+        if (personID == null)
+            return null;
+
         db.collection("Players")
                 .whereEqualTo("PID", personID)
                 .get()
@@ -489,6 +498,9 @@ public class DatabaseHelper {
     }
 
     public String getSuggestion(String personID) {
+        if (personID == null)
+            return null;
+
         db.collection("Players")
                 .whereEqualTo("PID", personID)
                 .get()
@@ -510,6 +522,9 @@ public class DatabaseHelper {
     }
 
     public void getPlayerNameFromPlayerID(String personID) {
+        if (personID == null)
+            return;
+
         db.collection("Person")
                 .document(personID)
                 .get()
@@ -568,6 +583,9 @@ public class DatabaseHelper {
     }
 
     public String getPersonInfoFromPlayerID(String personID) {
+        if (personID == null)
+            return null;
+
         db.collection("Person")
                 .document(personID)
                 .get()
@@ -593,6 +611,9 @@ public class DatabaseHelper {
     }
 
     public String getPlayerInformationFromPlayerID(String personID) {
+        if (personID == null)
+            return null;
+
         db.collection("Player")
                 .document(personID)
                 .get()
@@ -616,6 +637,9 @@ public class DatabaseHelper {
     }
 
     public void getPlayerCoachThreshold() {
+        if (currentTeamID == null)
+            return;
+
         db.collection("Teams")
                 .document(currentTeamID)
                 .get()

@@ -44,7 +44,7 @@
         android:layout_height="60dp"
         android:layout_gravity="start|center_vertical"
         android:gravity="start"
-        android:background="@drawable/spinner_layer"
+        android:background="@drawable/spinner_layer_signup"
         android:dropDownWidth="350dp"
         android:popupBackground="#FFffffff"
         app:layout_constraintEnd_toEndOf="parent"
