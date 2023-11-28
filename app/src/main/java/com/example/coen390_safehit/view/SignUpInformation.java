@@ -25,7 +25,7 @@ import java.util.List;
 public class SignUpInformation extends AppCompatActivity {
     Spinner typeDropdown, teamDropdown, positionDropdown, teamDropdownTrainer;
 
-    LinearLayout coachLayout, playerLayout, trainerLayout;
+    LinearLayout coachLayout, playerLayout;
     Button signUpButton;
     TextInputEditText firstName, lastName;
     TextInputEditText teamName;
@@ -59,7 +59,6 @@ public class SignUpInformation extends AppCompatActivity {
         // Layout of coach, player, and trainer
         coachLayout = findViewById(R.id.coach_layout);
         playerLayout = findViewById(R.id.player_layout);
-        trainerLayout = findViewById(R.id.trainer_layout);
     }
 
     // To setup layout fields available to all users
@@ -90,28 +89,18 @@ public class SignUpInformation extends AppCompatActivity {
                     // Hide all layouts
                     coachLayout.setVisibility(LinearLayout.GONE);
                     playerLayout.setVisibility(LinearLayout.GONE);
-                    trainerLayout.setVisibility(LinearLayout.GONE);
                 } else if (type.equals("Coach")) {
                     // Show coach layout and enable fields specific to user type
                     coachLayout.setVisibility(LinearLayout.VISIBLE);
                     enableCoachReservedFields();
                     // Hide other layouts
                     playerLayout.setVisibility(LinearLayout.GONE);
-                    trainerLayout.setVisibility(LinearLayout.GONE);
                 } else if (type.equals("Player")) {
                     // Show player layout and enable fields specific to user type
                     playerLayout.setVisibility(LinearLayout.VISIBLE);
                     enablePlayerReservedFields();
                     // Hide other layouts
                     coachLayout.setVisibility(LinearLayout.GONE);
-                    trainerLayout.setVisibility(LinearLayout.GONE);
-                } else if (type.equals("Trainer")) {
-                    // Show trainer layout and enable fields specific to user type
-                    trainerLayout.setVisibility(LinearLayout.VISIBLE);
-                    enableTrainerReservedFields();
-                    // Hide other layouts
-                    coachLayout.setVisibility(LinearLayout.GONE);
-                    playerLayout.setVisibility(LinearLayout.GONE);
                 }
             }
 

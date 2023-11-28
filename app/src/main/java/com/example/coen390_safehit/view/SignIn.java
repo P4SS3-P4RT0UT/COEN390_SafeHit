@@ -3,10 +3,12 @@ package com.example.coen390_safehit.view;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -23,6 +25,7 @@ public class SignIn extends AppCompatActivity {
     Button signIn, createAccount;
     ProgressBar progressBar;
     FirebaseAuth mAuth;
+    CheckBox rememberMe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +41,10 @@ public class SignIn extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        SharedPreferences sharedPreferences = getSharedPreferences("checkbox", MODE_PRIVATE);
         FirebaseUser user = mAuth.getCurrentUser();
+        if (sharedPreferences.getString("remember", "").equals("true"))
+            signIn(sharedPreferences.getString("email", ""), sharedPreferences.getString("password", ""), true);
         if (user != null) {
             // Go to profile/main page
         }
@@ -46,7 +52,7 @@ public class SignIn extends AppCompatActivity {
 
     void setupEditTextFields() {
         // Email
-        email = findViewById(R.id.editTextSignInEmail);
+        email = findViewById(R.id.editThreshold);
         // Password
         password = findViewById(R.id.editTextSignInPassword);
     }
@@ -57,6 +63,7 @@ public class SignIn extends AppCompatActivity {
 
     void setupButtons() {
         // Sign in button
+        rememberMe = findViewById(R.id.rememberme);
         signIn = findViewById(R.id.signInButton);
         signIn.setOnClickListener(view -> {
             if (validEmailAndPassword()) {
@@ -66,24 +73,7 @@ public class SignIn extends AppCompatActivity {
                 signIn.setVisibility(View.GONE);
                 createAccount.setVisibility(View.GONE);
                 // Connect to account
-                mAuth.signInWithEmailAndPassword(email.getText().toString().toLowerCase(), String.valueOf(password.getText()))
-                        .addOnCompleteListener(this, task -> {
-                            progressBar.setVisibility(View.GONE);
-
-                            if (task.isSuccessful()) {
-                                // Sign in success, update UI with the signed-in user's information
-                                Toast.makeText(SignIn.this, "Sign in successful", Toast.LENGTH_SHORT).show();
-                                checkDatabase();
-                            } else {
-                                // If sign in fails, display a message to the user
-                                signIn.setVisibility(View.VISIBLE);
-                                createAccount.setVisibility(View.VISIBLE);
-                                email.setEnabled(true);
-                                password.setEnabled(true);
-                                Toast.makeText(SignIn.this, "Authentication failed.",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                signIn(email.getText().toString().toLowerCase(), String.valueOf(password.getText()), false);
             }
         });
         // Create an account button
@@ -93,9 +83,50 @@ public class SignIn extends AppCompatActivity {
         });
     }
 
-    void checkDatabase() {
+    void signIn(String emailText, String passwordText, boolean remembered) {
+        mAuth.signInWithEmailAndPassword(emailText, passwordText)
+                .addOnCompleteListener(this, task -> {
+                    progressBar.setVisibility(View.GONE);
+
+                    if (task.isSuccessful()) {
+                        if (remembered) {
+
+                        } else if (rememberMe.isChecked()) {
+                            // Save email and password
+                            SharedPreferences sharedPreferences = getSharedPreferences("checkbox", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("remember", "true");
+                            editor.putString("email", emailText);
+                            editor.putString("password", passwordText);
+
+                            editor.apply();
+                        } else {
+                            // Remove email and password
+                            SharedPreferences sharedPreferences = getSharedPreferences("checkbox", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("remember", "false");
+                            editor.putString("email", "");
+                            editor.putString("password", "");
+                            editor.apply();
+                        }
+                        // Sign in success, update UI with the signed-in user's information
+                        Toast.makeText(SignIn.this, "Sign in successful", Toast.LENGTH_SHORT).show();
+                        checkDatabase(emailText);
+                    } else {
+                        // If sign in fails, display a message to the user
+                        signIn.setVisibility(View.VISIBLE);
+                        createAccount.setVisibility(View.VISIBLE);
+                        email.setEnabled(true);
+                        password.setEnabled(true);
+                        Toast.makeText(SignIn.this, "Authentication failed.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    void checkDatabase(String emailText) {
         DatabaseHelper db = DatabaseHelper.getInstance(this);
-        db.getPersonFromEmail(email.getText().toString().toLowerCase(), new DatabaseHelper.FetchCallback() {
+        db.getPersonFromEmail(emailText, new DatabaseHelper.FetchCallback() {
             @Override
             public void onComplete() {
                 if (DatabaseHelper.personType.equals("Coach") || DatabaseHelper.personType.equals("Trainer"))

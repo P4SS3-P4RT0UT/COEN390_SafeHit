@@ -1,6 +1,7 @@
 package com.example.coen390_safehit.view;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,9 +17,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.widget.NestedScrollView;
 
 import com.example.coen390_safehit.R;
+import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
@@ -61,17 +64,23 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
     private LineChart lineChart, lineChart2;
     private TextView hitTypeTextView;
 
+    String playerID;
+
     ProgressBar progressBar;
     NestedScrollView nestedScrollView;
 
     ArrayList<String> hitCountArrayList = new ArrayList<>();
     ArrayList<String> lastWeekHitArraylist = new ArrayList();
     ArrayList<String> seasonHitArrayList = new ArrayList<>();
+    float threshold;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player_data_overview);
+
+        playerID = getIntent().getStringExtra("pid");
+
 
         toolbar = findViewById(R.id.player_data_toolbar);
         pieChart = findViewById(R.id.pie_chart);
@@ -82,7 +91,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         hitTypeTextView = findViewById(R.id.hit_textView);
 
         progressBar = findViewById(R.id.progressBar);
-
+        threshold = Float.parseFloat(DatabaseHelper.threshold);
         getHitData();
         setupToolBar();
     }
@@ -174,30 +183,36 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
     void setupToolBar() {
         toolbar.setTitle("");
-        TextView title = (TextView) toolbar.findViewById(R.id.toolbar_title);
-        title.setText(PlayerProfileActivity.playerName.getText());
+        TextView title = toolbar.findViewById(R.id.toolbar_title);
+        String fn = getIntent().getStringExtra("fn");
+        title.setText(fn);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        CoordinatorLayout coordinatorLayout = findViewById(R.id.background);
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.soft_hit) {
+                coordinatorLayout.setBackgroundTintList(null);
                 hitTypeTextView.setText("Soft Hit");
                 createDirectionGraph(0, 4, "Soft hit");
                 createSeasonGraph(0, 4, "Soft hit");
                 createLastWeekGraph(0, 4, "Soft hit");
                 return true;
             } else if (item.getItemId() == R.id.hard_hit) {
+                //backgroundtint in yellow
+                coordinatorLayout.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#7A3F00")));
                 hitTypeTextView.setText("Hard Hit");
-                createDirectionGraph(4, 8, "Hard hit");
-                createSeasonGraph(4, 8, "Hard hit");
-                createLastWeekGraph(4, 8, "Hard hit");
+                createDirectionGraph(4, threshold, "Hard hit");
+                createSeasonGraph(4, threshold, "Hard hit");
+                createLastWeekGraph(4, threshold, "Hard hit");
                 return true;
             } else if (item.getItemId() == R.id.critical_hit) {
+                coordinatorLayout.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#7A0000")));
                 hitTypeTextView.setText("Critical Hit");
-                createDirectionGraph(8, 100, "Critical hit");
-                createSeasonGraph(8, 100, "Critical hit");
-                createLastWeekGraph(8, 100, "Critical hit");
+                createDirectionGraph(threshold, 100, "Critical hit");
+                createSeasonGraph(threshold, 100, "Critical hit");
+                createLastWeekGraph(threshold, 100, "Critical hit");
                 return true;
             }
             return false;

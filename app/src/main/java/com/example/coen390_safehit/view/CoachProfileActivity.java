@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.R;
 import com.example.coen390_safehit.controller.PlayerAdapter;
+import com.example.coen390_safehit.model.Coach;
 import com.example.coen390_safehit.model.Player;
 import com.google.firebase.firestore.DocumentSnapshot;
 

@@ -160,24 +160,6 @@
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/trainer_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:background="@drawable/custom_layout_border"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <Spinner
-            android:id="@+id/teamnameTrainer_dropdown"
-            android:layout_width="360dp"
-            android:layout_height="60dp"
-            android:layout_marginTop="20dp"
-            android:backgroundTint="@color/white"
-            android:spinnerMode="dropdown" />
-    </LinearLayout>
-
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
@@ -193,7 +175,7 @@
         android:id="@+id/signUpButton"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/button_background"
+        android:background="@drawable/button_background_curved"
         android:text="sign up"
         android:textColor="@color/white"
         android:textSize="15sp"

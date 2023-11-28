@@ -1,11 +1,13 @@
 package com.example.coen390_safehit.view;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -44,6 +46,8 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
     Player player;
     DatabaseHelper database;
 
+    Button dataButton;
+
 
     TextView positionTextView, numberTextView, suggestionTextView, statusTextView;
     MenuItem editAction;
@@ -80,7 +84,7 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
                             String[] hit = hitValue.split("\\|");
                             if (Double.parseDouble(hit[1]) < 4) {
                                 softHitCount++;
-                            } else if (Double.parseDouble(hit[1]) < 8) {
+                            } else if (Double.parseDouble(hit[1]) < Double.parseDouble(DatabaseHelper.threshold)) {
                                 hardHitCount++;
                             } else {
                                 criticalHitCount++;
@@ -96,6 +100,7 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
                     cardViewPlayerData.setVisibility(View.VISIBLE);
                     cardViewPlayerSuggestion.setVisibility(View.VISIBLE);
                     cardViewPlayerStatus.setVisibility(View.VISIBLE);
+                    dataButton.setVisibility(View.VISIBLE);
                     createGraph();
 
 
@@ -175,6 +180,17 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
         numberTextView = findViewById(R.id.coach_data_number);
         suggestionTextView = findViewById(R.id.textViewDisplaySuggestion);
         statusTextView = findViewById(R.id.textViewDisplayStatus);
+
+        dataButton = findViewById(R.id.dataButton2);
+
+        dataButton.setOnClickListener(view -> {
+            Intent intent = new Intent(getApplicationContext(), PlayerDataOverviewActivity.class);
+            intent.putExtra("pid", player.getPid());
+            intent.putExtra("fn", player.getFirstName() + " " + player.getLastName());
+            intent.putExtra("mac", player.getMac());
+
+            startActivity(intent);
+        });
 
         linearLayout = findViewById(R.id.linearLayout2);
         cardViewPlayerData = findViewById(R.id.cardViewPlayerData);

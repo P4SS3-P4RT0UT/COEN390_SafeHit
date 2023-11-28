@@ -3,9 +3,13 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_color">
+    android:background="@drawable/background_color"
+    android:backgroundTintMode="add"
+    android:backgroundTint="#7A3F00">
+
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -16,13 +20,13 @@
     </FrameLayout>
 
     <androidx.appcompat.widget.Toolbar
-        android:visibility="gone"
         android:id="@+id/player_data_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -43,11 +47,11 @@
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nested_scroll_view"
-        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:visibility="gone">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -57,12 +61,13 @@
 
             <TextView
                 android:id="@+id/hit_textView"
-                android:text="Hard Hit"
-                android:textSize="30sp"
-                android:textStyle="bold"
-                android:padding="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="Hard Hit"
+                android:textColor="@color/white"
+                android:textSize="30sp"
+                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -85,6 +90,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
 
+                    android:background="@drawable/card_background_color"
                     android:padding="8dp">
 
                     <TextView
@@ -94,6 +100,7 @@
                         android:layout_marginStart="50dp"
                         android:layout_marginEnd="50dp"
                         android:text="Hit Direction Data"
+                        android:textColor="@color/white"
                         android:textSize="24sp"
                         android:textStyle="bold"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -132,6 +139,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
 
+                    android:background="@drawable/card_background_color"
                     android:padding="8dp">
 
                     <TextView
@@ -141,8 +149,9 @@
                         android:layout_marginStart="50dp"
                         android:layout_marginEnd="50dp"
                         android:text="Current Game Data"
-                        android:textStyle="bold"
+                        android:textColor="@color/white"
                         android:textSize="24sp"
+                        android:textStyle="bold"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -192,8 +201,8 @@
                         android:layout_marginStart="50dp"
                         android:layout_marginEnd="50dp"
                         android:text="Seasonal Data"
-                        android:textStyle="bold"
                         android:textSize="24sp"
+                        android:textStyle="bold"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />

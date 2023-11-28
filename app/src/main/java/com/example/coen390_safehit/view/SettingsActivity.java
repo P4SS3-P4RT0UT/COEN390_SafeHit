@@ -5,15 +5,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.coen390_safehit.R;
+import com.example.coen390_safehit.controller.DatabaseHelper;
+import com.example.coen390_safehit.model.Coach;
 import com.example.coen390_safehit.model.Player;
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanner;
@@ -28,30 +32,73 @@ public class SettingsActivity extends AppCompatActivity {
     // Toolbar for back navigation
     private Toolbar toolbar;
 
-    private Button scan;
-
-
+    private Button scan, backButton, thresholdButton;
+    private SeekBar thresholdSeekBar;
+    TextView thresholdValue, thresholdText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        // Setup the toolbar
-        setupToolBar();
+        DatabaseHelper db = new DatabaseHelper();
+
         // Fetch the id from the previous activity
         uid = getIntent().getStringExtra("pid");
-        type= getIntent().getStringExtra("type");
+        type = getIntent().getStringExtra("type");
         scan = findViewById(R.id.scan);
+        thresholdButton = findViewById(R.id.thresholdButton);
+        thresholdSeekBar = findViewById(R.id.thresholdBar);
+        thresholdValue = findViewById(R.id.thresholdValue);
+        thresholdText = findViewById(R.id.textView3);
 
+        boolean changed = false;
 
-        scan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onAttachDeviceClicked();
-            }
-        });
+        if (type.equals("Coach")) {
+            scan.setVisibility(View.GONE);
+            thresholdButton.setVisibility(View.VISIBLE);
+            thresholdValue.setVisibility(View.VISIBLE);
+            thresholdText.setVisibility(View.VISIBLE);
+            thresholdValue.setText(db.threshold);
 
+            thresholdButton.setOnClickListener(v -> {
+                db.udpateCoachThreshold(String.valueOf(thresholdSeekBar.getProgress() / 10.0f), uid);
+                Toast.makeText(SettingsActivity.this, "Threshold updated", Toast.LENGTH_SHORT).show();
+            });
 
+            thresholdSeekBar.setVisibility(View.VISIBLE);
+
+            thresholdSeekBar.setProgress((int) (Double.parseDouble(db.threshold) * 10));
+            thresholdSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                float progressChangedValue = 0;
+
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                    progressChangedValue = progress / 10.0f; // Divide by 10 to get the decimal value
+                    thresholdValue = findViewById(R.id.thresholdValue);
+                    thresholdValue.setText(String.format("%.1f", progressChangedValue)); // Display value with one decimal
+                }
+
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    thresholdValue = findViewById(R.id.thresholdValue);
+                    thresholdValue.setText(String.format("%.1f", progressChangedValue)); // Display value with one decimal
+                }
+            });
+
+        } else {
+            thresholdButton.setVisibility(View.GONE);
+            thresholdValue.setVisibility(View.GONE);
+            thresholdSeekBar.setVisibility(View.GONE);
+            thresholdText.setVisibility(View.GONE);
+
+            scan.setVisibility(View.VISIBLE);
+            scan.setOnClickListener(v -> onAttachDeviceClicked());
+        }
+
+        backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(v -> goBackToMainPage(type, uid));
     }
 
     public void onLogOutClicked(View view) {
@@ -61,7 +108,8 @@ public class SettingsActivity extends AppCompatActivity {
     public void onDeleteAccountClicked(View view) {
         // Delete account from database
     }
-    public void onAttachDeviceClicked(){
+
+    public void onAttachDeviceClicked() {
 //        Intent intent  = new Intent(getApplicationContext(), ScanningActivity.class);
 //        startActivity(intent);
         GmsBarcodeScannerOptions options = new GmsBarcodeScannerOptions.Builder()
@@ -91,27 +139,22 @@ public class SettingsActivity extends AppCompatActivity {
                         e -> {
                             // Task failed with an exception
                             Log.d("SETTINGS EXCEPTION", "Error ");
-                            Toast.makeText(SettingsActivity.this,"Scanning did not work", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SettingsActivity.this, "Scanning did not work", Toast.LENGTH_SHORT).show();
                         });
     }
+
     public void onUpdateInfoClicked(View view) {
         goToPersonalInformation();
     }
 
-    private void setupToolBar() {
-        toolbar = findViewById(R.id.toolbarSettings);
-        toolbar.setTitle("Settings");
-        toolbar.setTitleTextColor(Color.WHITE);
-        setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-        // Redirect user back to their main page
-        toolbar.setNavigationOnClickListener(view -> goBackToMainPage(type, uid));
-    }
-
     public void goToSignIn() {
+        SharedPreferences sharedPreferences = getSharedPreferences("checkbox", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("remember", "false");
+        editor.putString("email", "");
+        editor.putString("password", "");
+        editor.apply();
+
         Intent intent = new Intent(getApplicationContext(), SignIn.class);
         startActivity(intent);
     }
@@ -130,7 +173,7 @@ public class SettingsActivity extends AppCompatActivity {
                 Intent coachProfile = new Intent(getApplicationContext(), CoachProfileActivity.class);
                 startActivity(coachProfile);
                 break;
-                // Go back to player main page
+            // Go back to player main page
             case "Player":
                 Intent playerProfile = new Intent(getApplicationContext(), PlayerProfileActivity.class);
                 startActivity(playerProfile);
