@@ -43,6 +43,7 @@ public class UpdateInformationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_information);
+
         uid = getIntent().getStringExtra("pid");
         type = getIntent().getStringExtra("type");
         firstName= findViewById(R.id.firstName);
