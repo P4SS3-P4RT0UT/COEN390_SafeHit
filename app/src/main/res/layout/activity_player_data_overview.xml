@@ -12,10 +12,11 @@
 
 
     <FrameLayout
+        android:id="@+id/loadingLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/loadingLayout"
-        android:gravity="center">
+        android:gravity="center"
+        android:visibility="visible">
 
     </FrameLayout>
 
@@ -23,26 +24,12 @@
         android:id="@+id/player_data_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
+        android:background="@android:color/transparent"
         android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/toolbar_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Player Name"
-            android:textColor="@color/white"
-            android:textSize="35sp"
-            android:textStyle="bold" />
-
-
-    </androidx.appcompat.widget.Toolbar>
+        app:layout_constraintTop_toTopOf="parent"></androidx.appcompat.widget.Toolbar>
 
 
     <androidx.core.widget.NestedScrollView
@@ -58,19 +45,32 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="20dp"
+                android:text="Player Name"
+                android:textColor="@color/white"
+                android:textSize="60sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
 
             <TextView
                 android:id="@+id/hit_textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
                 android:padding="10dp"
                 android:text="Hard Hit"
                 android:textColor="@color/white"
                 android:textSize="30sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/toolbar_title" />
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardViewPlayerData"
@@ -192,6 +192,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
 
+                    android:background="@drawable/card_background_color"
                     android:padding="8dp">
 
                     <TextView
@@ -201,6 +202,7 @@
                         android:layout_marginStart="50dp"
                         android:layout_marginEnd="50dp"
                         android:text="Seasonal Data"
+                        android:textColor="@color/white"
                         android:textSize="24sp"
                         android:textStyle="bold"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -227,11 +229,12 @@
     </androidx.core.widget.NestedScrollView>
 
     <ProgressBar
-        android:backgroundTint="@color/white"
         android:id="@+id/progressBar"
         android:layout_width="100dp"
         android:layout_height="100dp"
+        android:backgroundTint="@color/white"
         android:indeterminate="true"
+        android:visibility="visible"
         app:layout_anchor="@+id/loadingLayout"
         app:layout_anchorGravity="center" />
 
