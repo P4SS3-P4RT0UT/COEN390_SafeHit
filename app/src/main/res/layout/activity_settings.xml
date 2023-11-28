@@ -58,7 +58,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
+    <Button
         android:id="@+id/DeleteAccount"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
@@ -66,7 +66,6 @@
         android:background="@drawable/button_background_dark"
         android:clickable="true"
         android:minHeight="48dp"
-        android:onClick="onDeleteAccountClicked"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:text="Delete account"

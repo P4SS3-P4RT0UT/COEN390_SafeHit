@@ -4,6 +4,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -14,6 +15,7 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 
 import com.example.coen390_safehit.R;
 import com.example.coen390_safehit.controller.DatabaseHelper;
@@ -32,7 +34,7 @@ public class SettingsActivity extends AppCompatActivity {
     // Toolbar for back navigation
     private Toolbar toolbar;
 
-    private Button scan, backButton, thresholdButton;
+    private Button scan, backButton, thresholdButton, deleteButton;
     private SeekBar thresholdSeekBar;
     TextView thresholdValue, thresholdText;
 
@@ -99,14 +101,40 @@ public class SettingsActivity extends AppCompatActivity {
 
         backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(v -> goBackToMainPage(type, uid));
+        
+        deleteButton = findViewById(R.id.DeleteAccount);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                showDeleteConfirmationDialog();
+            }
+        });
     }
 
     public void onLogOutClicked(View view) {
         goToSignIn();
     }
 
-    public void onDeleteAccountClicked(View view) {
-        // Delete account from database
+   private void showDeleteConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete Account");
+        builder.setMessage("Are you sure you want to delete your account? Your data will be lost permanently.");
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Call the delete account method from DatabaseHelper
+                DatabaseHelper.getInstance(SettingsActivity.this).deleteAccount(uid, type);
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.create().show();
     }
 
     public void onAttachDeviceClicked() {
