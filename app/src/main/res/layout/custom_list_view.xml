@@ -41,5 +41,18 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:textSize="18sp" />
+
+
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/warning"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/ic_warning"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:textSize="24sp"
+        android:textColor="@color/black"
+        android:gravity="center" />
 </LinearLayout>
