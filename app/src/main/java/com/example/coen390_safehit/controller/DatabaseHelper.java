@@ -15,6 +15,7 @@ import com.example.coen390_safehit.model.Player;
 import com.example.coen390_safehit.view.CoachDataOverviewActivity;
 import com.example.coen390_safehit.view.CoachProfileActivity;
 import com.example.coen390_safehit.view.PlayerProfileActivity;
+import com.example.coen390_safehit.view.SettingsActivity;
 import com.example.coen390_safehit.view.UpdateInformationActivity;
 import com.example.coen390_safehit.view.SignIn;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -30,6 +31,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 
+import org.checkerframework.checker.units.qual.C;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +44,7 @@ public class DatabaseHelper {
     public HashMap<String, String> teamsList = new HashMap<>();
 
     public static String personID;
+    public static String playerID;
     public static String personType;
     public static String currentTeamID;
     public static String currentTeamName;
@@ -369,7 +373,7 @@ public class DatabaseHelper {
     public void getTeamsFromCoachID(String coachID, FetchCallback callback) {
         if (coachID == null)
             return;
-        
+
         teamsList.clear();
         db.collection("Teams")
                 .whereEqualTo("CoachID", coachID)
@@ -523,7 +527,7 @@ public class DatabaseHelper {
         return null;
     }
 
-    public void getPlayerNameFromPlayerID(String personID) {
+    public void getPlayerNameFromPlayerID(String personID, Context context) {
         if (personID == null)
             return;
 
@@ -551,17 +555,69 @@ public class DatabaseHelper {
                     if (task.isSuccessful()) {
                         for (DocumentSnapshot document : task.getResult()) {
                             Log.d(TAG, document.getId() + " => " + document.getData());
+                            playerID = document.getId();
                             currentTeamID = document.getString("TeamID");
                             macAddress = document.getString("mac");
                             if (macAddress == null)
                                 // TODO: CHANGE TO NULL
-                                macAddress = "08:D1:F9:A4:F7:38";
+                                macAddress = null;
                             getPlayerCoachThreshold();
+                            PlayerProfileActivity.updateButton(context);
                         }
                     } else {
                         Log.d(TAG, "Error getting documents: ", task.getException());
                     }
                 });
+    }
+
+    public void unlinkDevice(Context context, String uid) {
+        if (playerID != null) {
+            db.collection("Players")
+                    .document(playerID)
+                    .update("mac", null)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Toast.makeText(context, "Device unlinked successfully", Toast.LENGTH_SHORT).show();
+                            SettingsActivity.resetLinkButton(context);
+                        }
+                    });
+        } else {
+            db.collection("Players")
+                    .whereEqualTo("PID", uid)
+                    .get()
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                                // Update each document
+                                db.collection("Players").document(documentSnapshot.getId())
+                                        .update("mac", null)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Toast.makeText(context, "Device unlinked successfully", Toast.LENGTH_SHORT).show();
+                                                SettingsActivity.resetLinkButton(context);
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(context, "Failed to unlink device", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(context, "Failed to unlink device", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+
+
     }
 
     public String getUserTypeFromPlayerID(String personID) {

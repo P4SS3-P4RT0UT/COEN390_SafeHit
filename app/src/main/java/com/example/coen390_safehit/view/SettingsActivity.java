@@ -4,6 +4,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,10 +16,12 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.coen390_safehit.R;
 import com.example.coen390_safehit.controller.DatabaseHelper;
+import com.example.coen390_safehit.controller.QRCodeScanner;
 import com.example.coen390_safehit.model.Coach;
 import com.example.coen390_safehit.model.Player;
 import com.google.mlkit.vision.barcode.common.Barcode;
@@ -34,15 +37,19 @@ public class SettingsActivity extends AppCompatActivity {
     // Toolbar for back navigation
     private Toolbar toolbar;
 
-    private Button scan, backButton, thresholdButton, deleteButton;
+    private static Button scan;
+    private Button backButton;
+    private Button thresholdButton;
+    private Button deleteButton;
     private SeekBar thresholdSeekBar;
     TextView thresholdValue, thresholdText;
+    DatabaseHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        DatabaseHelper db = new DatabaseHelper();
+        db = DatabaseHelper.getInstance(this);
 
         // Fetch the id from the previous activity
         uid = getIntent().getStringExtra("pid");
@@ -96,12 +103,20 @@ public class SettingsActivity extends AppCompatActivity {
             thresholdText.setVisibility(View.GONE);
 
             scan.setVisibility(View.VISIBLE);
-            scan.setOnClickListener(v -> onAttachDeviceClicked());
+            if (DatabaseHelper.macAddress == null) {
+                scan.setOnClickListener(v -> QRCodeScanner.onAttachDeviceClicked(this));
+            } else {
+                scan.setText("Unlink Device");
+                scan.setOnClickListener(v -> {
+                    db.unlinkDevice(this, DatabaseHelper.personID);
+                });
+            }
+
         }
 
         backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(v -> goBackToMainPage(type, uid));
-        
+
         deleteButton = findViewById(R.id.DeleteAccount);
         deleteButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -110,11 +125,16 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
+    public static void resetLinkButton(Context context) {
+        scan.setText("Connect to a device");
+        scan.setOnClickListener(v -> QRCodeScanner.onAttachDeviceClicked(context));
+    }
+
     public void onLogOutClicked(View view) {
         goToSignIn();
     }
 
-   private void showDeleteConfirmationDialog() {
+    private void showDeleteConfirmationDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete Account");
         builder.setMessage("Are you sure you want to delete your account? Your data will be lost permanently.");
@@ -137,39 +157,6 @@ public class SettingsActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    public void onAttachDeviceClicked() {
-//        Intent intent  = new Intent(getApplicationContext(), ScanningActivity.class);
-//        startActivity(intent);
-        GmsBarcodeScannerOptions options = new GmsBarcodeScannerOptions.Builder()
-                .setBarcodeFormats(
-                        Barcode.FORMAT_QR_CODE,
-                        Barcode.FORMAT_AZTEC)
-                .build();
-
-        GmsBarcodeScanner scanner = GmsBarcodeScanning.getClient(this);
-
-        scanner
-                .startScan()
-                .addOnSuccessListener(
-                        barcode -> {
-                            // Task completed successfully
-                            String rawValue = barcode.getRawValue();
-                            Player player = new Player();
-                            player.setMac(rawValue);
-                            Toast.makeText(SettingsActivity.this, "The device is connected", Toast.LENGTH_SHORT).show();
-
-                        })
-                .addOnCanceledListener(
-                        () -> {
-                            // Task canceled
-                        })
-                .addOnFailureListener(
-                        e -> {
-                            // Task failed with an exception
-                            Log.d("SETTINGS EXCEPTION", "Error ");
-                            Toast.makeText(SettingsActivity.this, "Scanning did not work", Toast.LENGTH_SHORT).show();
-                        });
-    }
 
     public void onUpdateInfoClicked(View view) {
         goToPersonalInformation();

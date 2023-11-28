@@ -108,7 +108,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
     void getHitData() {
         DatabaseReference hitRef = FirebaseDatabase.getInstance("https://safehit-3da2b-default-rtdb.europe-west1.firebasedatabase.app/")
                 .getReference()
-                .child("08:D1:F9:A4:F7:38")
+                .child(DatabaseHelper.macAddress)
                 .child("hit");
 
         hitRef.addListenerForSingleValueEvent(new ValueEventListener() {

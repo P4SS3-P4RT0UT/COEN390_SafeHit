@@ -1,5 +1,6 @@
 package com.example.coen390_safehit.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -11,12 +12,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.R;
+import com.example.coen390_safehit.controller.QRCodeScanner;
 
 public class PlayerProfileActivity extends AppCompatActivity {
     public static TextView playerName;
 
     TextView coachSuggestion, playerStatus;
-    Button dataButton;
+    static Button dataButton;
 
     DatabaseHelper db = DatabaseHelper.getInstance(this);
     String playerID = DatabaseHelper.personID;
@@ -39,19 +41,32 @@ public class PlayerProfileActivity extends AppCompatActivity {
         db.coachSuggestion = coachSuggestion;
         dataButton = findViewById(R.id.dataButton);
 
-
-        dataButton.setOnClickListener(view -> {
-            Intent intent = new Intent(getApplicationContext(), PlayerDataOverviewActivity.class);
-            intent.putExtra("fn", playerName.getText().toString());
-            startActivity(intent);
-        });
-
         setupToolbar();
         loadPlayerName();
         loadStatus();
         loadSuggestion();
+
+
         //loadType();
     }
+
+    public static void updateButton(Context context) {
+        if (DatabaseHelper.macAddress == null) {
+            dataButton.setText("Connect a new device\n to view data");
+            dataButton.setOnClickListener(view -> {
+                QRCodeScanner.onAttachDeviceClicked(context);
+            });
+        } else {
+            dataButton.setText("View Impacts Data");
+
+            dataButton.setOnClickListener(view -> {
+                Intent intent = new Intent(context, PlayerDataOverviewActivity.class);
+                intent.putExtra("fn", playerName.getText().toString());
+                context.startActivity(intent);
+            });
+        }
+    }
+
 
     void setupToolbar() {
         // Settings icon
@@ -73,7 +88,7 @@ public class PlayerProfileActivity extends AppCompatActivity {
     }
 
     private void loadPlayerName() {
-        db.getPlayerNameFromPlayerID(playerID);
+        db.getPlayerNameFromPlayerID(playerID, this);
 
     }
 
