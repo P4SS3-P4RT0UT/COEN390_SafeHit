@@ -44,6 +44,7 @@ public class DatabaseHelper {
     private static Context currentContext;
 
     public static String threshold;
+    public static String macAddress;
 
     public TextView playerStatus;
     public TextView coachSuggestion;
@@ -72,7 +73,7 @@ public class DatabaseHelper {
         void onFailure(Exception e);
     }
 
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    static FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     //================================================================================
     // region Add Person, Player, Team and Coach to database
@@ -327,6 +328,33 @@ public class DatabaseHelper {
                 });
     }
 
+    public static void updatePlayerMac(String mac, String uid) {
+        db.collection("Players")
+                .whereEqualTo("PID", uid)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+                        String documentID = documentSnapshot.getId();
+                        db.collection("Players")
+                                .document(documentID)
+                                .update("mac", mac)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+                                        Toast.makeText(currentContext, "Mac Updated successfully", Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(currentContext, "Failed to update information", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    }
+                });
+    }
+
 
     //================================================================================
     // region Get Person, Player, Team and Coach from database
@@ -491,6 +519,7 @@ public class DatabaseHelper {
                             DocumentSnapshot document = task.getResult();
                             Log.d(TAG, document.getId() + " => " + document.getData());
                             playerName.setText((document.getString("FirstName") + " " + document.getString("LastName")));
+
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
@@ -505,6 +534,10 @@ public class DatabaseHelper {
                         for (DocumentSnapshot document : task.getResult()) {
                             Log.d(TAG, document.getId() + " => " + document.getData());
                             currentTeamID = document.getString("TeamID");
+                            macAddress = document.getString("mac");
+                            if (macAddress == null)
+                                // TODO: CHANGE TO NULL
+                                macAddress = "08:D1:F9:A4:F7:38";
                             getPlayerCoachThreshold();
                         }
                     } else {
@@ -608,9 +641,6 @@ public class DatabaseHelper {
     //================================================================================
     // endregion
     //================================================================================
-    public void updatePlayerName() {
-
-    }
 }
 
 
