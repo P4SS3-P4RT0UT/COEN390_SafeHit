@@ -1,5 +1,6 @@
 package com.example.coen390_safehit.model;
 
+import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.google.type.DateTime;
 
 import java.util.List;
@@ -49,6 +50,7 @@ public class Player extends Person {
     }
 
     public void setMac(String mac) {
+        DatabaseHelper.updatePlayerMac(mac, pid);
         this.mac = mac;
     }
 

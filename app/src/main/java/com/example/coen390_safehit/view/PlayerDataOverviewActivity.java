@@ -97,8 +97,10 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         } else {
             threshold = Float.parseFloat(DatabaseHelper.threshold);
         }
-        
-        getHitData();
+
+        if (DatabaseHelper.macAddress != null)
+            getHitData();
+        else finish();
         setupToolBar();
     }
 
