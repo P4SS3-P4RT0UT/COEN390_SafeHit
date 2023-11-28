@@ -64,6 +64,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
     private LineChart lineChart, lineChart2;
     private TextView hitTypeTextView;
 
+    private Color backgroundColor;
     String playerID;
 
     ProgressBar progressBar;
@@ -191,9 +192,10 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
     void setupToolBar() {
         toolbar.setTitle("");
-        TextView title = toolbar.findViewById(R.id.toolbar_title);
+        TextView title = findViewById(R.id.toolbar_title);
         String fn = getIntent().getStringExtra("fn");
         title.setText(fn);
+        backgroundColor = Color.valueOf(Color.parseColor("#7A3F00"));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -201,6 +203,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         CoordinatorLayout coordinatorLayout = findViewById(R.id.background);
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.soft_hit) {
+                backgroundColor = Color.valueOf(getResources().getColor(R.color.green));
                 coordinatorLayout.setBackgroundTintList(null);
                 hitTypeTextView.setText("Soft Hit");
                 createDirectionGraph(0, 4, "Soft hit");
@@ -209,6 +212,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
                 return true;
             } else if (item.getItemId() == R.id.hard_hit) {
                 //backgroundtint in yellow
+                backgroundColor = Color.valueOf(Color.parseColor("#7A3F00"));
                 coordinatorLayout.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#7A3F00")));
                 hitTypeTextView.setText("Hard Hit");
                 createDirectionGraph(4, threshold, "Hard hit");
@@ -216,6 +220,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
                 createLastWeekGraph(4, threshold, "Hard hit");
                 return true;
             } else if (item.getItemId() == R.id.critical_hit) {
+                backgroundColor = Color.valueOf(Color.parseColor("#7A0000"));
                 coordinatorLayout.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#7A0000")));
                 hitTypeTextView.setText("Critical Hit");
                 createDirectionGraph(threshold, 100, "Critical hit");
@@ -281,9 +286,13 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         pieChart.setData(data);
         pieChart.setDrawEntryLabels(true);
         pieChart.setDescription(null);
-        pieChart.setEntryLabelTextSize(10f);
-        pieChart.setEntryLabelColor(Color.BLACK);
+        pieChart.setEntryLabelTextSize(14f);
+        pieChart.setEntryLabelColor(Color.WHITE);
         pieChart.setExtraOffsets(15, 15, 15, 15);
+
+        pieChart.setTransparentCircleColor(Color.BLACK);
+
+        pieChart.setHoleColor(Color.TRANSPARENT);
 
         Legend legend = pieChart.getLegend();
         legend.setEnabled(false);
@@ -314,8 +323,14 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
         entries.sort(new EntryXComparator());
         LineDataSet lineDataSet = new LineDataSet(entries, hitStrength + " rate over time");
-        lineDataSet.setColor(Color.BLUE);
+        lineDataSet.setColor(Color.WHITE);
+
+        lineDataSet.setCircleRadius(2.5f);
+        lineDataSet.setCircleColor(Color.WHITE);
+
         lineDataSet.setDrawValues(false);
+        lineDataSet.setDrawFilled(true);
+        lineDataSet.setFillColor(backgroundColor.toArgb());
 
 
         LineData lineData = new LineData(lineDataSet);
@@ -325,6 +340,14 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
         // Customize the X-axis to show hours and minutes
         XAxis xAxis = lineChart.getXAxis();
+        xAxis.setTextColor(Color.WHITE);
+
+        lineChart.getAxisLeft().setTextColor(Color.WHITE);
+        lineChart.getAxisRight().setTextColor(Color.WHITE);
+        lineChart.setGridBackgroundColor(Color.WHITE);
+        lineChart.getLegend().setTextColor(Color.WHITE);
+        lineChart.getLegend().setTextSize(12f);
+
         DecimalFormat decimalFormat = new DecimalFormat("00");
         xAxis.setValueFormatter(new ValueFormatter() {
             @Override
@@ -364,9 +387,11 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         Collections.sort(entries, new EntryXComparator());
 
         // Create the data set and set its properties
-        LineDataSet lineDataSet = new LineDataSet(entries, hitStrength + " rate over Time");
-        lineDataSet.setColor(Color.BLUE);
+        LineDataSet lineDataSet = new LineDataSet(entries, hitStrength + " rate over time");
+        lineDataSet.setColor(Color.WHITE);
         lineDataSet.setDrawValues(false);  // Don't draw values on the chart
+        lineDataSet.setDrawFilled(true);  // Fill the area under the line
+        lineDataSet.setFillColor(backgroundColor.toArgb());
 
         // Create the LineData object with the dataset
         LineData lineData = new LineData(lineDataSet);
@@ -375,6 +400,14 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
         // Customize the X-axis to show dates or week numbers
         XAxis xAxis = lineChart2.getXAxis();
+        xAxis.setTextColor(Color.WHITE);
+
+        lineChart2.getAxisLeft().setTextColor(Color.WHITE);
+        lineChart2.getAxisRight().setTextColor(Color.WHITE);
+        lineChart2.getLegend().setTextColor(Color.WHITE);
+        lineChart2.getLegend().setTextSize(12f);
+
+
         xAxis.setValueFormatter(new ValueFormatter() {
             private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd", Locale.getDefault());
 
