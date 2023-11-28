@@ -6,10 +6,10 @@ import java.util.List;
 public class Coach extends Person {
 
     // Attributes
-
     int cid; // Coach ID
     String title; // Official title
     List<Team> teams; // Associated team(s)
+    double threshold; // Threshold for the coach
 
     // Constructors
 
@@ -22,9 +22,19 @@ public class Coach extends Person {
         this.cid = cid;
         this.title = title;
         this.teams = teams;
+        threshold = 8; // Default threshold
     }
 
     // Getters and setters
+
+
+    public void setThreshold(double threshold) {
+        this.threshold = threshold;
+    }
+
+    public double getThreshold() {
+        return threshold;
+    }
 
     public int getCid() {
         return cid;

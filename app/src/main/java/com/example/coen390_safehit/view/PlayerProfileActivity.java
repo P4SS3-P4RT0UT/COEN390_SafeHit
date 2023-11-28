@@ -38,7 +38,13 @@ public class PlayerProfileActivity extends AppCompatActivity {
         coachSuggestion = findViewById(R.id.textViewDisplaySuggestion);
         db.coachSuggestion = coachSuggestion;
         dataButton = findViewById(R.id.dataButton);
-        dataButton.setOnClickListener(view -> startActivity(new Intent(getApplicationContext(), PlayerDataOverviewActivity.class)));
+
+
+        dataButton.setOnClickListener(view -> {
+            Intent intent = new Intent(getApplicationContext(), PlayerDataOverviewActivity.class);
+            intent.putExtra("fn", playerName.getText().toString());
+            startActivity(intent);
+        });
 
         setupToolbar();
         loadPlayerName();
@@ -56,9 +62,8 @@ public class PlayerProfileActivity extends AppCompatActivity {
     void goToSettings() {
         Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
         intent.putExtra("pid", playerID);
-        intent.putExtra("type","Player");
-       // intent.putExtra("type",userType.toString());
-        startActivity(intent);
+        intent.putExtra("type", "Player");
+
         startActivity(intent);
     }
 
@@ -69,14 +74,11 @@ public class PlayerProfileActivity extends AppCompatActivity {
 
     private void loadPlayerName() {
         db.getPlayerNameFromPlayerID(playerID);
+
     }
 
     private void loadStatus() {
         db.getStatus(playerID);
-    }
-    private void loadType() {
-        db.getUserTypeFromPlayerID(playerID);
-        userType=db.userType;
     }
 
     private void loadSuggestion() {
