@@ -91,7 +91,13 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         hitTypeTextView = findViewById(R.id.hit_textView);
 
         progressBar = findViewById(R.id.progressBar);
-        threshold = Float.parseFloat(DatabaseHelper.threshold);
+
+        if (DatabaseHelper.threshold == null) {
+            threshold = 8;
+        } else {
+            threshold = Float.parseFloat(DatabaseHelper.threshold);
+        }
+        
         getHitData();
         setupToolBar();
     }
