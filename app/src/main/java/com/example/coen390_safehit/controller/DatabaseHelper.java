@@ -21,6 +21,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -662,6 +664,7 @@ public class DatabaseHelper {
                     }
                 });
     }
+
     //================================================================================
     // Delete person, player, team from database
     //================================================================================
@@ -692,9 +695,21 @@ public class DatabaseHelper {
                             currentContext.startActivity(intent);
                             Toast.makeText(currentContext, "Account deleted successfully", Toast.LENGTH_SHORT).show();
                         }
+                        deleteUserFromFirebase();
                     } else {
                         // Handle the exception if deletion fails for the person document
                         Toast.makeText(currentContext, "Failed to delete account: " + personTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    public void deleteUserFromFirebase() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        user.delete()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "User account deleted.");
                     }
                 });
     }

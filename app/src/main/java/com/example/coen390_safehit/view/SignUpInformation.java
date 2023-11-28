@@ -26,7 +26,7 @@ public class SignUpInformation extends AppCompatActivity {
     Spinner typeDropdown, teamDropdown, positionDropdown, teamDropdownTrainer;
 
     LinearLayout coachLayout, playerLayout;
-    Button signUpButton;
+    Button signUpButton, cancelButton;
     TextInputEditText firstName, lastName;
     TextInputEditText teamName;
     TextInputEditText number;
@@ -49,6 +49,12 @@ public class SignUpInformation extends AppCompatActivity {
 
         // Setup the progress bar
         progressBar = findViewById(R.id.progressBar);
+
+        cancelButton = findViewById(R.id.cancel_button);
+        cancelButton.setOnClickListener(view -> {
+            db.deleteUserFromFirebase();
+            finish();
+        });
 
         // Setup the sign up button
         setupSignUpButton();
