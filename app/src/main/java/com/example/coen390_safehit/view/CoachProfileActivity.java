@@ -72,7 +72,12 @@ public class CoachProfileActivity extends AppCompatActivity {
         playerListView.setOnItemClickListener((adapterView, view, position, l) -> {
             selectedProfile = (Player) adapterView.getItemAtPosition(position);
 
+            if (selectedProfile.getMac() == null) {
+                Toast.makeText(this, "Player does not have a device connected", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(this, CoachDataOverviewActivity.class);
+            intent.putExtra("mac", selectedProfile.getMac());
             startActivity(intent);
         });
     }
@@ -88,7 +93,7 @@ public class CoachProfileActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             DocumentSnapshot person = task.getResult();
                             if (person.exists()) {
-                                Player p = new Player(person.getString("Email"), person.getString("FirstName"), person.getString("LastName"), player.getString("PID"), Integer.parseInt(player.getString("Number")), player.getString("Position"), person.getString("Team"), player.getString("Status"), player.getString("Suggestion"));
+                                Player p = new Player(person.getString("Email"), person.getString("FirstName"), person.getString("LastName"), player.getString("PID"), Integer.parseInt(player.getString("Number")), player.getString("Position"), person.getString("Team"), player.getString("Status"), player.getString("Suggestion"), player.getString("mac"));
                                 Log.d("Player", person.getString("FirstName") + " " + person.getString("LastName") + ", " + player.getString("Position") + ", " + player.getString("Number"));
                                 String playerText = person.getString("FirstName") + " " + person.getString("LastName") + ", " + player.getString("Position") + ", " + player.getString("Number");
                                 playerslist.add(p);

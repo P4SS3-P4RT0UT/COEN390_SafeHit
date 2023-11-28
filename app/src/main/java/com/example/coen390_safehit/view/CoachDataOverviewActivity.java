@@ -58,6 +58,8 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
     CardView cardViewPlayerStatus, cardViewPlayerSuggestion, cardViewPlayerData;
 
 
+    String macAddress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,10 +67,12 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
 
         database = DatabaseHelper.getInstance(this);
 
+        macAddress = getIntent().getStringExtra("mac");
+
         // Get a reference to the 'Hard hit' node
         DatabaseReference hitRef = FirebaseDatabase.getInstance("https://safehit-3da2b-default-rtdb.europe-west1.firebasedatabase.app/")
                 .getReference()
-                .child(DatabaseHelper.macAddress)
+                .child(macAddress)
                 .child("hit");
 
         // Read the data once
