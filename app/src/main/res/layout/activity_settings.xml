@@ -1,104 +1,153 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.SettingsActivity">
+    tools:context=".view.SettingsActivity"
+    android:background="@drawable/card_background_color">
 
 
+    <Button
+        android:id="@+id/thresholdButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/ic_check"
+        app:layout_constraintBottom_toBottomOf="@+id/thresholdBar"
+        app:layout_constraintStart_toEndOf="@+id/thresholdBar"
+        app:layout_constraintTop_toTopOf="@+id/thresholdBar" />
 
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbarSettings"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        app:layout_constraintEnd_toEndOf="parent"
+    <Button
+        android:id="@+id/backButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/ic_arrow_back"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/settings"
-            android:layout_width="250dp"
-            android:layout_height="60dp"
-            android:layout_marginStart="10dp"
-            android:textColor="@color/black"
-            android:textAlignment="textStart"
-            android:textSize="34sp"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:layout_editor_absoluteY="10dp" />
-
-    </androidx.appcompat.widget.Toolbar>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/settingsOptions"
+        android:id="@+id/textView2"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Settings Options:"
+        android:layout_height="80dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Settings"
+        android:textColor="@color/white"
+        android:textSize="60sp"
         android:textStyle="bold"
-        android:textSize="24sp"
-        android:layout_marginTop="100dp"
-        android:layout_marginStart="20dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/backButton" />
 
     <TextView
         android:id="@+id/logOut"
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/settingsOptions"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginBottom="30dp"
+        android:background="@drawable/button_background_dark"
         android:clickable="true"
         android:minHeight="48dp"
         android:onClick="onLogOutClicked"
         android:text="Log out"
-        android:textSize="24sp" />
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/UpdateInfo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/DeleteAccount"
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/logOut"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginBottom="50dp"
+        android:background="@drawable/button_background_dark"
         android:clickable="true"
         android:minHeight="48dp"
         android:onClick="onDeleteAccountClicked"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
         android:text="Delete account"
-        android:textSize="24sp" />
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.504"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/UpdateInfo"
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/DeleteAccount"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:background="@drawable/button_background_dark"
         android:clickable="true"
         android:minHeight="48dp"
         android:onClick="onUpdateInfoClicked"
-        android:text="Update personal information"
-        android:textSize="24sp" />
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:text="Update Information"
+
+        android:textAlignment="center"
+        android:textColor="@color/white"
+
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/scan"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 
     <Button
         android:id="@+id/scan"
         android:layout_width="301dp"
-        android:layout_height="51dp"
-        android:layout_below="@+id/UpdateInfo"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="55dp"
-        android:layout_marginTop="19dp"
-        android:layout_marginEnd="55dp"
-        android:layout_marginBottom="274dp"
-        android:background="@color/cardview_shadow_end_color"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        android:background="@drawable/button_background_dark"
+        android:padding="20dp"
         android:text="Connect to a device"
-        android:textColor="@color/black"
-        android:textSize="20dp" />
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/DeleteAccount"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <SeekBar
+        android:id="@+id/thresholdBar"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:max="100"
+        android:min="50"
+        android:progress="80"
+        android:layout_marginStart="50dp"
+        android:layout_marginBottom="150dp"
+        app:layout_constraintBottom_toTopOf="@+id/logOut"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Threshold: "
+        android:textColor="@color/white"
+        android:textSize="32sp"
+        app:layout_constraintBottom_toTopOf="@+id/thresholdBar"
+        app:layout_constraintStart_toStartOf="@+id/thresholdBar"
+        app:layout_constraintTop_toBottomOf="@+id/textView2"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/thresholdValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="8"
+        android:textColor="@color/white"
+        android:textSize="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/thresholdBar"
+        app:layout_constraintStart_toEndOf="@+id/textView3" />
 
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

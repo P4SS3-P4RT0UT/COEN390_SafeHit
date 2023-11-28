@@ -20,11 +20,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class SignUp extends AppCompatActivity {
-    Toolbar toolbar;
     TextInputEditText email, password;
-    Button signUp;
+    Button signUp, backButton;
     FirebaseAuth mAuth;
     ProgressBar progressBar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,19 +34,22 @@ public class SignUp extends AppCompatActivity {
         setupAuthentication();
         setupButtons();
         setupProgressBar();
-        setupToolBar();
     }
 
     void setupEditTextFields() {
         email = findViewById(R.id.editTextSignUpEmail);
-        password = findViewById(R.id.FirstNameField);
+        password = findViewById(R.id.editTextSignUpPassword);
     }
 
     void setupButtons() {
+        backButton = findViewById(R.id.backButton2);
+        backButton.setOnClickListener(v -> finish());
+
         signUp = findViewById(R.id.signUpButton);
         signUp.setOnClickListener(view -> {
             if (validEmailAndPassword()) {
                 progressBar.setVisibility(View.VISIBLE);
+                signUp.setVisibility(View.GONE);
                 mAuth.createUserWithEmailAndPassword(String.valueOf(email.getText()), String.valueOf(password.getText()))
                         .addOnCompleteListener(this, task -> {
                             progressBar.setVisibility(View.GONE);
@@ -57,6 +60,7 @@ public class SignUp extends AppCompatActivity {
                                 //Go to the next page for sign up information
                                 goToSignUpInformation();
                             } else {
+                                signUp.setVisibility(View.VISIBLE);
                                 // If sign in fails, display a message to the user.
                                 Toast.makeText(SignUp.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
@@ -93,18 +97,4 @@ public class SignUp extends AppCompatActivity {
         Toast.makeText(SignUp.this, "Please fill all required fields", Toast.LENGTH_SHORT).show();
     }
 
-    private void setupToolBar() {
-        toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("");
-        setSupportActionBar(toolbar);
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
-        //Return to previous page
-        toolbar.setNavigationOnClickListener(v -> finish());
-
-    }
 }

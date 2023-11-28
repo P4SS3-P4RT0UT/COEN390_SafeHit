@@ -42,12 +42,17 @@ public class DatabaseHelper {
     public static String currentTeamID;
     public static String currentTeamName;
     private static Context currentContext;
+
+    public static String threshold;
+
     public TextView playerStatus;
     public TextView coachSuggestion;
     public TextView playerName;
     public TextView firstName;
     public TextView lastName;
+
     public static String userType;
+
     public TextView playerNumber;
     public TextView playerPosition;
     public TextView playerTeam;
@@ -83,6 +88,7 @@ public class DatabaseHelper {
                     public void onSuccess(String teamID) {
                         currentTeamID = teamID;
                         Toast.makeText(currentContext, "Team added successfully", Toast.LENGTH_SHORT).show();
+
                         Intent coachProfile = new Intent(currentContext, CoachProfileActivity.class);
                         currentContext.startActivity(coachProfile);
                     }
@@ -163,6 +169,11 @@ public class DatabaseHelper {
         person.put("Email", email);
         person.put("Type", type);
 
+        if (type == "Coach") {
+            person.put("Threshold", "8");
+            threshold = "8";
+        }
+
         db.collection("Person").add(person)
                 .addOnSuccessListener(documentReference -> callback.onSuccess(documentReference.getId()))
                 .addOnFailureListener(e -> callback.onFailure(e));
@@ -206,6 +217,25 @@ public class DatabaseHelper {
                     }
                 });
 
+    }
+
+    public void udpateCoachThreshold(String thresholdValue, String uid) {
+        Map<String, String> person = new HashMap<>();
+        person.put("Threshold", thresholdValue);
+
+        db.collection("Person")
+                .document(uid)
+                .update("Threshold", thresholdValue)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Toast.makeText(currentContext, "Threshold Updated successfully", Toast.LENGTH_SHORT).show();
+                        Intent coachProfile = new Intent(currentContext, CoachProfileActivity.class);
+                        currentContext.startActivity(coachProfile);
+                        threshold = thresholdValue;
+
+                    }
+                });
     }
 
     public void updateCoach(String firstName, String lastName, String uid, String teamname) {
@@ -279,7 +309,7 @@ public class DatabaseHelper {
                 });
     }
 
-    public void updatePlayerData(Player player, String suggestion, String status) {
+    public void updatePlayerData(Player player) {
         db.collection("Players")
                 .whereEqualTo("PID", player.getPid())
                 .get()
@@ -289,8 +319,8 @@ public class DatabaseHelper {
                         String documentID = documentSnapshot.getId();
                         db.collection("Players")
                                 .document(documentID)
-                                .update("Suggestion", suggestion,
-                                        "Status", status)
+                                .update("Suggestion", player.getSuggestion(),
+                                        "Status", player.getStatus())
                                 .addOnSuccessListener(unused -> Toast.makeText(currentContext, "Information Updated successfully", Toast.LENGTH_SHORT).show())
                                 .addOnFailureListener(e -> Toast.makeText(currentContext, "Failed to update information and add team", Toast.LENGTH_SHORT).show());
                     }
@@ -309,6 +339,7 @@ public class DatabaseHelper {
 
     //Returns TeamID and TeamName
     public void getTeamsFromCoachID(String coachID, FetchCallback callback) {
+        teamsList.clear();
         db.collection("Teams")
                 .whereEqualTo("CoachID", coachID)
                 .get()
@@ -361,6 +392,7 @@ public class DatabaseHelper {
 
     public List<String> getTeams() {
         List<String> teams = new ArrayList<>();
+        teams.add("Select a team");
         db.collection("Teams")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -393,6 +425,8 @@ public class DatabaseHelper {
                         if (!task.getResult().isEmpty()) {
                             personID = task.getResult().getDocuments().get(0).getId();
                             personType = task.getResult().getDocuments().get(0).get("Type").toString();
+                            if (personType.equals("Coach"))
+                                threshold = task.getResult().getDocuments().get(0).get("Threshold").toString();
                             Log.d(TAG, personID + " => " + task.getResult().getDocuments().get(0).getData());
                             callback.onComplete();
                         }
@@ -414,6 +448,7 @@ public class DatabaseHelper {
                             for (DocumentSnapshot document : task.getResult()) {
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                                 playerStatus.setText(document.getString("Status"));
+                                currentTeamID = task.getResult().getDocuments().get(0).get("TeamID").toString();
                             }
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
@@ -445,7 +480,7 @@ public class DatabaseHelper {
         return null;
     }
 
-    public String getPlayerNameFromPlayerID(String personID) {
+    public void getPlayerNameFromPlayerID(String personID) {
         db.collection("Person")
                 .document(personID)
                 .get()
@@ -462,7 +497,20 @@ public class DatabaseHelper {
                     }
                 });
 
-        return null;
+        db.collection("Players")
+                .whereEqualTo("PID", personID)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            Log.d(TAG, document.getId() + " => " + document.getData());
+                            currentTeamID = document.getString("TeamID");
+                            getPlayerCoachThreshold();
+                        }
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
+                    }
+                });
     }
 
     public String getUserTypeFromPlayerID(String personID) {
@@ -498,6 +546,9 @@ public class DatabaseHelper {
                             firstName.setText(document.getString("FirstName"));
                             lastName.setText(document.getString("LastName"));
                             userType = (document.getString("Type"));
+                            if (userType.equals("Coach")) {
+                                threshold = (document.getString("Threshold"));
+                            }
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
@@ -528,6 +579,30 @@ public class DatabaseHelper {
                 });
 
         return null;
+    }
+
+    public void getPlayerCoachThreshold() {
+        db.collection("Teams")
+                .document(currentTeamID)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        db.collection("Person")
+                                .document(task.getResult().getString("CoachID"))
+                                .get()
+                                .addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful()) {
+                                        DocumentSnapshot document = task1.getResult();
+                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                        threshold = document.getString("Threshold");
+                                    } else {
+                                        Log.d(TAG, "Error getting documents: ", task.getException());
+                                    }
+                                });
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
+                    }
+                });
     }
 
     //================================================================================
