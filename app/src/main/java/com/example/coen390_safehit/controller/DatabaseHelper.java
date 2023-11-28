@@ -16,6 +16,7 @@ import com.example.coen390_safehit.view.CoachDataOverviewActivity;
 import com.example.coen390_safehit.view.CoachProfileActivity;
 import com.example.coen390_safehit.view.PlayerProfileActivity;
 import com.example.coen390_safehit.view.UpdateInformationActivity;
+import com.example.coen390_safehit.view.SignIn;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -637,7 +638,105 @@ public class DatabaseHelper {
                     }
                 });
     }
+    //================================================================================
+    // Delete person, player, team from database
+    //================================================================================
+    public void deleteAccount(String uid, String type) {
 
+        String personsCollection = "Person";
+
+        // Build the path to the user document in the persons collection
+        String personDocumentPath = personsCollection + "/" + uid;
+
+        // Get the reference to the user document
+        DocumentReference personDocumentRef = db.document(personDocumentPath);
+
+        // Delete the user document from the persons collection
+        personDocumentRef
+                .delete()
+                .addOnCompleteListener(personTask -> {
+                    if (personTask.isSuccessful()) {
+                        // Document deleted successfully
+                        if (type.equals("Player")) {
+                            // If the user is a player, also delete their player document
+                            deletePlayerDocument(uid);
+                        } else if (type.equals("Coach")) {
+                            // If the user is a coach, also delete their team and remove coach ID
+                            deleteCoachTeam(uid);
+                        } else {
+                            Intent intent = new Intent(currentContext, SignIn.class);
+                            currentContext.startActivity(intent);
+                            Toast.makeText(currentContext, "Account deleted successfully", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        // Handle the exception if deletion fails for the person document
+                        Toast.makeText(currentContext, "Failed to delete account: " + personTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void deletePlayerDocument(String uid) {
+        db.collection("Players")
+                .whereEqualTo("PID", uid)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            String playerDocumentId = document.getId();
+                            db.collection("Players")
+                                    .document(playerDocumentId)
+                                    .delete()
+                                    .addOnCompleteListener(playerTask -> {
+                                        if (playerTask.isSuccessful()) {
+                                            // Player document deleted successfully
+                                            // Navigate to the login screen
+                                            Intent intent = new Intent(currentContext, SignIn.class);
+                                            currentContext.startActivity(intent);
+                                            Toast.makeText(currentContext, "Account deleted successfully", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            // Handle the exception if deletion fails for the player document
+                                            Toast.makeText(currentContext, "Failed to delete account: " + playerTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    } else {
+                        // Handle the exception if fetching the player document fails
+                        Toast.makeText(currentContext, "Failed to delete account: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // Method to delete a coach's team and remove coach ID from the team document
+    private void deleteCoachTeam(String coachUid) {
+        db.collection("Teams")
+                .whereEqualTo("CoachID", coachUid)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            String teamDocumentId = document.getId();
+                            db.collection("Teams")
+                                    .document(teamDocumentId)
+                                    .delete()
+                                    .addOnCompleteListener(teamTask -> {
+                                        if (teamTask.isSuccessful()) {
+                                            // Team document deleted successfully
+                                            // Navigate to the login screen
+                                            Intent intent = new Intent(currentContext, SignIn.class);
+                                            currentContext.startActivity(intent);
+                                            Toast.makeText(currentContext, "Account deleted successfully", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            // Handle the exception if deletion fails for the team document
+                                            Toast.makeText(currentContext, "Failed to delete account: " + teamTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    } else {
+                        // Handle the exception if fetching the coach's team document fails
+                        Toast.makeText(currentContext, "Failed to delete account: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
     //================================================================================
     // endregion
     //================================================================================
