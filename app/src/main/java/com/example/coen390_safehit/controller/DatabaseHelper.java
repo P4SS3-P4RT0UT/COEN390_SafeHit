@@ -50,6 +50,7 @@ public class DatabaseHelper {
     public TextView playerName;
     public TextView firstName;
     public TextView lastName;
+    public TextView coachName;
 
     public static String userType;
 
@@ -543,8 +544,11 @@ public class DatabaseHelper {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             Log.d(TAG, document.getId() + " => " + document.getData());
-                            firstName.setText(document.getString("FirstName"));
-                            lastName.setText(document.getString("LastName"));
+                            if (firstName != null) {
+                                firstName.setText(document.getString("FirstName"));
+                                lastName.setText(document.getString("LastName"));
+                            }
+                            coachName.setText(document.getString("FirstName") + " " + document.getString("LastName"));
                             userType = (document.getString("Type"));
                             if (userType.equals("Coach")) {
                                 threshold = (document.getString("Threshold"));

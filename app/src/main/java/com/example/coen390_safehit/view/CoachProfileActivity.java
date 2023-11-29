@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
@@ -28,7 +29,6 @@ import java.util.List;
 
 public class CoachProfileActivity extends AppCompatActivity {
     // Layout elements
-    private Toolbar toolbar;
     private ListView playerListView;
     private Spinner teamSpinner;
     // Settings icon
@@ -51,13 +51,15 @@ public class CoachProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_coach_profile);
         db = DatabaseHelper.getInstance(this);
         coachID = DatabaseHelper.personID;
-        toolbar = findViewById(R.id.toolbar);
         teamSpinner = findViewById(R.id.teamList);
         playerListView = findViewById(R.id.playerList);
+        db.coachName = findViewById(R.id.coachName);
 
+        db.getPersonInfoFromPlayerID(coachID);
+        btnSettings = findViewById(R.id.btnSettings);
+        btnSettings.setOnClickListener(view -> goToSettings());
         loadTeams();
         setupTeamSpinner();
-        setupToolBar();
         setupPlayerList();
     }
 
@@ -168,15 +170,6 @@ public class CoachProfileActivity extends AppCompatActivity {
         currentTeamName = teamSpinner.getSelectedItem().toString();
         currentTeamID = db.teamsList.get(currentTeamName);
         loadPlayers();
-    }
-
-    private void setupToolBar() {
-        toolbar.setTitle("");
-        toolbar.setNavigationIcon(null);
-        setSupportActionBar(toolbar);
-        // Settings icon
-        btnSettings = findViewById(R.id.btnSettings);
-        btnSettings.setOnClickListener(view -> goToSettings());
     }
 
     void goToSettings() {
