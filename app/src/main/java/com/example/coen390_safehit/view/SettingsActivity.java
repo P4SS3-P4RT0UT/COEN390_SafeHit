@@ -32,7 +32,7 @@ import com.google.mlkit.vision.codescanner.GmsBarcodeScanning;
 public class SettingsActivity extends AppCompatActivity {
 
     // Person id to identify user
-    private String uid;
+    private static String uid;
     private String type;
     // Toolbar for back navigation
     private Toolbar toolbar;
@@ -43,7 +43,7 @@ public class SettingsActivity extends AppCompatActivity {
     private Button deleteButton;
     private SeekBar thresholdSeekBar;
     TextView thresholdValue, thresholdText;
-    DatabaseHelper db;
+    static DatabaseHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +104,8 @@ public class SettingsActivity extends AppCompatActivity {
 
             scan.setVisibility(View.VISIBLE);
             if (DatabaseHelper.macAddress == null) {
-                scan.setOnClickListener(v -> QRCodeScanner.onAttachDeviceClicked(this));
+                scan.setText("Connect to a Device");
+                scan.setOnClickListener(v -> QRCodeScanner.onAttachDeviceClicked(uid, this));
             } else {
                 scan.setText("Unlink Device");
                 scan.setOnClickListener(v -> {
@@ -126,8 +127,16 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public static void resetLinkButton(Context context) {
-        scan.setText("Connect to a device");
-        scan.setOnClickListener(v -> QRCodeScanner.onAttachDeviceClicked(context));
+        if (DatabaseHelper.macAddress == null) {
+            scan.setText("Connect to a Device");
+            scan.setOnClickListener(v -> QRCodeScanner.onAttachDeviceClicked(uid, context));
+        } else {
+            scan.setText("Unlink Device");
+            scan.setOnClickListener(v -> {
+                db.unlinkDevice(context, DatabaseHelper.personID);
+            });
+
+        }
     }
 
     public void onLogOutClicked(View view) {
