@@ -346,13 +346,15 @@ public class DatabaseHelper {
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void unused) {
-                                        Toast.makeText(currentContext, "Mac Updated successfully", Toast.LENGTH_SHORT).show();
+                                        macAddress = mac;
+                                        Toast.makeText(currentContext, "Device connected", Toast.LENGTH_SHORT).show();
+                                        SettingsActivity.resetLinkButton(currentContext);
                                     }
                                 })
                                 .addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(currentContext, "Failed to update information", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(currentContext, "Failed to connect device", Toast.LENGTH_SHORT).show();
                                     }
                                 });
                     }
@@ -579,6 +581,7 @@ public class DatabaseHelper {
                         @Override
                         public void onSuccess(Void unused) {
                             Toast.makeText(context, "Device unlinked successfully", Toast.LENGTH_SHORT).show();
+                            macAddress = null;
                             SettingsActivity.resetLinkButton(context);
                         }
                     });

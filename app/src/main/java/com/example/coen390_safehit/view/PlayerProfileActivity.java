@@ -21,7 +21,7 @@ public class PlayerProfileActivity extends AppCompatActivity {
     static Button dataButton;
 
     DatabaseHelper db = DatabaseHelper.getInstance(this);
-    String playerID = DatabaseHelper.personID;
+    static String playerID = DatabaseHelper.personID;
 
     String userType;
 
@@ -45,16 +45,14 @@ public class PlayerProfileActivity extends AppCompatActivity {
         loadPlayerName();
         loadStatus();
         loadSuggestion();
-
-
-        //loadType();
     }
 
     public static void updateButton(Context context) {
+        label:
         if (DatabaseHelper.macAddress == null) {
             dataButton.setText("Connect a new device\n to view data");
             dataButton.setOnClickListener(view -> {
-                QRCodeScanner.onAttachDeviceClicked(context);
+                QRCodeScanner.onAttachDeviceClicked(playerID, context);
             });
         } else {
             dataButton.setText("View Impacts Data");
