@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Random;
 
 public class PlayerAdapter extends ArrayAdapter<Player> {
+
+    CriticalHitListener criticalHitListener;
+
     public PlayerAdapter(Context context, List<Player> players) {
         super(context, 0, players);
     }
@@ -39,6 +42,7 @@ public class PlayerAdapter extends ArrayAdapter<Player> {
         if (player != null) {
             if (player.getMac() != null) {
                 warning.setVisibility(View.GONE);
+                criticalHitListener = new CriticalHitListener(getContext(), player.getMac(), player.getFirstName() + " " + player.getLastName());
             } else {
                 warning.setVisibility(View.VISIBLE);
             }

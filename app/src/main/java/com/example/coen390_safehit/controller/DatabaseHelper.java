@@ -27,6 +27,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
@@ -58,6 +59,7 @@ public class DatabaseHelper {
     public TextView playerName;
     public TextView firstName;
     public TextView lastName;
+    public TextView coachName;
 
     public static String userType;
 
@@ -149,6 +151,8 @@ public class DatabaseHelper {
                 player.put("Number", number);
                 player.put("Position", position);
                 player.put("TeamID", teamID);
+                player.put("Suggestion", "None");
+                player.put("Status", "None");
                 personID = pID;
                 db.collection("Players").add(player)
                         .addOnSuccessListener(documentReference -> {
@@ -379,28 +383,29 @@ public class DatabaseHelper {
         teamsList.clear();
         db.collection("Teams")
                 .whereEqualTo("CoachID", coachID)
+                .orderBy("TeamName")
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                if (!teamsList.containsKey(document.getId())) {
-                                    teamsList.put(document.getData().get("TeamName").toString(), document.getId());
-                                    Log.d(TAG, document.getId() + " => " + document.getData());
-                                }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            if (!teamsList.containsKey(document.getId())) {
+                                teamsList.put(document.getData().get("TeamName").toString(), document.getId());
+                                Log.d(TAG, document.getId() + " => " + document.getData());
                             }
-                            callback.onComplete();
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                            callback.onError(task.getException());
                         }
+                        callback.onComplete();
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
+                        callback.onError(task.getException());
                     }
                 });
     }
 
     public void getPersonFromPlayerID(String playerID, OnCompleteListener<DocumentSnapshot> listener) {
-        db.collection("Person").document(playerID).get().addOnCompleteListener(listener);
+        db.collection("Person")
+                .document(playerID)
+                .get()
+                .addOnCompleteListener(listener);
     }
 
 
@@ -411,6 +416,7 @@ public class DatabaseHelper {
 
         db.collection("Players")
                 .whereEqualTo("TeamID", teamID)
+                .orderBy("Number")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -434,6 +440,7 @@ public class DatabaseHelper {
         List<String> teams = new ArrayList<>();
         teams.add("Select a team");
         db.collection("Teams")
+                .orderBy("TeamName")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -656,8 +663,14 @@ public class DatabaseHelper {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             Log.d(TAG, document.getId() + " => " + document.getData());
-                            firstName.setText(document.getString("FirstName"));
-                            lastName.setText(document.getString("LastName"));
+                            if (firstName != null) {
+                                firstName.setText(document.getString("FirstName"));
+                                lastName.setText(document.getString("LastName"));
+                            }
+                            if (coachName != null) {
+                                coachName.setText(document.getString("FirstName") + " " + document.getString("LastName"));
+                            }
+
                             userType = (document.getString("Type"));
                             if (userType.equals("Coach")) {
                                 threshold = (document.getString("Threshold"));
@@ -671,26 +684,58 @@ public class DatabaseHelper {
         return null;
     }
 
-    public String getPlayerInformationFromPlayerID(String personID) {
+    public String getPlayerInformationFromPlayerID(String personID, Context context) {
         if (personID == null)
             return null;
 
-        db.collection("Player")
-                .document(personID)
+        db.collection("Players")
+                .whereEqualTo("PID", personID)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            Log.d(TAG, document.getId() + " => " + document.getData());
-                            playerNumber.setText(document.getString("Number"));
-                            playerPosition.setText(document.getString("Position"));
-                            playerTeam.setText(document.getString("TeamID"));
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
 
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
+                            String teamID = documentSnapshot.getString("TeamID");
+                            String position = documentSnapshot.getString("Position");
+                            String number = documentSnapshot.getString("Number");
+                            // Update each document
+
+                            int teamIndex = -1;
+                            for (int i = 0; i < UpdateInformationActivity.teamDropdown.getAdapter().getCount(); i++) {
+                                String item = UpdateInformationActivity.teamDropdown.getAdapter().getItem(i).toString();
+                                if (teamsList.containsKey(item) && teamsList.get(item).equals(teamID)) {
+                                    teamIndex = i;
+                                    break;
+                                }
+                            }
+
+                            if (teamIndex >= 0) {
+                                UpdateInformationActivity.teamDropdown.setSelection(teamIndex);
+                            }
+
+                            int positionIndex = -1;
+                            for (int i = 0; i < UpdateInformationActivity.positionDropdown.getAdapter().getCount(); i++) {
+                                String item = UpdateInformationActivity.positionDropdown.getAdapter().getItem(i).toString();
+                                if (item.equalsIgnoreCase(position)) {
+                                    positionIndex = i;
+                                    break;
+                                }
+                            }
+
+                            if (positionIndex >= 0) {
+                                UpdateInformationActivity.positionDropdown.setSelection(positionIndex);
+                            }
+
+
+                            UpdateInformationActivity.number.setText(number);
                         }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(context, "Failed to unlink device", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -700,6 +745,7 @@ public class DatabaseHelper {
     public void getPlayerCoachThreshold() {
         if (currentTeamID == null)
             return;
+
 
         db.collection("Teams")
                 .document(currentTeamID)

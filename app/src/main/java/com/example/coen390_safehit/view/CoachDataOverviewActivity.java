@@ -2,12 +2,14 @@ package com.example.coen390_safehit.view;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -50,10 +52,9 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
 
 
     TextView positionTextView, numberTextView, suggestionTextView, statusTextView;
-    MenuItem editAction;
+    Button backButton, editButton;
 
     ProgressBar progressBar;
-    Toolbar toolbar;
     LinearLayout linearLayout;
     CardView cardViewPlayerStatus, cardViewPlayerSuggestion, cardViewPlayerData;
 
@@ -76,9 +77,12 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
                 .child("hit");
 
         // Read the data once
-        hitRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        hitRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                softHitCount = 0;
+                hardHitCount = 0;
+                criticalHitCount = 0;
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot hitSnapshot : dataSnapshot.getChildren()) {
                         String hitValue = hitSnapshot.getValue(String.class);
@@ -99,7 +103,9 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
                     }
 
                     progressBar.setVisibility(View.GONE);
-                    toolbar.setVisibility(View.VISIBLE);
+                    backButton.setVisibility(View.VISIBLE);
+                    editButton.setVisibility(View.VISIBLE);
+
                     linearLayout.setVisibility(View.VISIBLE);
                     cardViewPlayerData.setVisibility(View.VISIBLE);
                     cardViewPlayerSuggestion.setVisibility(View.VISIBLE);
@@ -129,40 +135,25 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
     // vulnerable, concussed, cleared
 
     private void setupToolBar() {
-        toolbar = findViewById(R.id.player_data_toolbar);
-        toolbar.setTitle("");
-        TextView title = (TextView) toolbar.findViewById(R.id.toolbar_title);
+        TextView title = findViewById(R.id.toolbar_title);
         title.setText(player.getFirstName() + " " + player.getLastName());
-        setSupportActionBar(toolbar);
+        title.setVisibility(View.VISIBLE);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        backButton = findViewById(R.id.backButton3);
+        backButton.setOnClickListener(view -> finish());
 
-        toolbar.setNavigationOnClickListener(v -> finish());
+        editButton = findViewById(R.id.editButton);
 
-        toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.edit_action) {
-                switchToEditMode();
-                return true;
-            }
-            return false;
+        editButton.setOnClickListener(view -> {
+            switchToEditMode();
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.coach_data_overview_menu, menu);
-        editAction = menu.findItem(R.id.edit_action);
-        return true;
     }
 
     void switchToEditMode() {
         if (suggestionTextView.isEnabled()) {
             //edit action change icon
 
-            editAction.setIcon(R.drawable.ic_edit);
+            editButton.setBackground(getResources().getDrawable(R.drawable.ic_edit));
             suggestionTextView.setEnabled(false);
             statusTextView.setEnabled(false);
             player.setSuggestion(suggestionTextView.getText().toString());
@@ -171,7 +162,7 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
         } else {
             suggestionTextView.setEnabled(true);
             statusTextView.setEnabled(true);
-            editAction.setIcon(R.drawable.ic_check);
+            editButton.setBackground(getResources().getDrawable(R.drawable.ic_check));
         }
     }
 
@@ -192,6 +183,7 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
             intent.putExtra("pid", player.getPid());
             intent.putExtra("fn", player.getFirstName() + " " + player.getLastName());
             intent.putExtra("mac", player.getMac());
+            DatabaseHelper.macAddress = player.getMac();
 
             startActivity(intent);
         });
@@ -237,6 +229,8 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
         pieChart.setData(data);
         pieChart.setDescription(null);
         pieChart.setEntryLabelColor(R.color.black);
+        pieChart.setHoleColor(Color.TRANSPARENT);
+        pieChart.setTransparentCircleColor(Color.BLACK);
 
         pieChart.getLegend().setEnabled(false);
 
