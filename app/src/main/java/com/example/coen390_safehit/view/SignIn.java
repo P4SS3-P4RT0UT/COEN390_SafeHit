@@ -24,6 +24,7 @@ public class SignIn extends AppCompatActivity {
     TextInputEditText email, password;
     Button signIn, createAccount;
     ProgressBar progressBar;
+
     FirebaseAuth mAuth;
     CheckBox rememberMe;
 
