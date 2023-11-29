@@ -1,9 +1,6 @@
 package com.example.coen390_safehit.model;
 
 import com.example.coen390_safehit.controller.DatabaseHelper;
-import com.google.type.DateTime;
-
-import java.util.List;
 
 // Model for the players
 public class Player extends Person {

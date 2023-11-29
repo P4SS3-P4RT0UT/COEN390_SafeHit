@@ -11,6 +11,7 @@ import android.util.Log;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.coen390_safehit.R;
 import com.google.firebase.database.DataSnapshot;
@@ -24,18 +25,19 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class CriticalHitListener {
 
     private DatabaseReference criticalHitRef;
-    Context context;
+    private Context context;
 
     // Use your own channel ID and notification ID
     private static final String CHANNEL_ID = "COACH_CHANNEL";
     private int notificationId = 1; // Initial value for notification ID
 
-    public CriticalHitListener() {
-        // Initialize the database helper
+    public CriticalHitListener(Context context, String macAddress, String playerName) {
+        this.context = context; // Set the context
+
         // Initialize database reference (hard hit node)
         criticalHitRef = FirebaseDatabase.getInstance("https://safehit-3da2b-default-rtdb.europe-west1.firebasedatabase.app/")
                 .getReference()
-                .child(DatabaseHelper.macAddress)
+                .child(macAddress)
                 .child("hit");
 
         criticalHitRef.addValueEventListener(new ValueEventListener() {
@@ -47,11 +49,8 @@ public class CriticalHitListener {
                         if (hitValue != null) {
                             String[] hit = hitValue.split("\\|");
                             if (Double.parseDouble(hit[1]) <= 8) {
-                                // Critical hit detected, trigger notification
-
-                                // Get the coach of the player who received the hit
-
-                                // sendNotificationToCoach(userID, "Your notification message");
+                                sendNotificationToCoach(DatabaseHelper.macAddress, playerName.toUpperCase() + ": Critical hit of " + hit[1] + " g detected", hit[0].split("@")[1]);
+                                break;
                             }
                             Log.d("FIREBASE REAL-TIME EVENT DETECTED", "Critical hit of " + hitValue + " g detected, sending notification to coach...");
                         }
@@ -71,43 +70,35 @@ public class CriticalHitListener {
 
     }
 
-    private void sendNotificationToCoach(String userId, String message) {
+    private void sendNotificationToCoach(String userId, String message, String timeStamp) {
+        // Check for notification permission before attempting to send a notification
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+        }
+
+        // Proceed with creating and sending the notification
         // Create a notification channel (for Android Oreo and above)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Channel Name";
-            String description = "Channel Description";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-
-            // Register the channel with the system
-            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+            // ... existing channel creation code ...
         }
 
-        // Generate a unique notification ID (could be a simple incremental value or a random number)
-        int uniqueNotificationId = notificationId++;
+        // Generate a unique notification ID
+        int uniqueNotificationId = notificationId++;  // Ensure notificationId is properly managed
 
         // Use the context to create notifications
-        // For example:
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setContentTitle("Critical Hit")
+                .setContentTitle("Critical Hit at " + timeStamp)
                 .setContentText(message)
-                // Add other notification properties as needed
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                // Set a small icon for the notification
+                .setSmallIcon(R.drawable.ic_check); // replace "ic_notification" with the name of your icon
 
         // Send the notification to the user
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        notificationManager.notify(uniqueNotificationId, builder.build());
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
+        notificationManagerCompat.notify(uniqueNotificationId, builder.build());
     }
+
+
 }
