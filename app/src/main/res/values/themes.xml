@@ -12,6 +12,8 @@
         <item name="android:textColorHighlight">@color/white</item>
         <item name="android:popupBackground">@android:color/transparent
         </item> <!-- Make the dropdown background transparent -->
+        <item name="buttonBarPositiveButtonStyle">@color/black</item>
+        <item name="buttonBarNegativeButtonStyle">@color/black</item>
 
         <item name="android:statusBarColor">@color/black</item>
         <!--        <item name="android:windowTranslucentStatus">true</item>-->
