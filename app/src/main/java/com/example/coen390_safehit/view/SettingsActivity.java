@@ -60,6 +60,8 @@ public class SettingsActivity extends AppCompatActivity {
         thresholdValue = findViewById(R.id.thresholdValue);
         thresholdText = findViewById(R.id.textView3);
 
+
+
         boolean changed = false;
 
         if (type.equals("Coach")) {

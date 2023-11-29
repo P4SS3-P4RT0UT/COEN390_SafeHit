@@ -21,9 +21,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.COEN390_SafeHit"
         tools:targetApi="31">
-        <activity
-            android:name=".view.SignIn"
-            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".view.SignIn"-->
+<!--            android:exported="false" />-->
         <activity
             android:name=".view.UpdateInformationActivity"
             android:exported="false" />
@@ -31,7 +31,7 @@
             android:name=".view.SettingsActivity"
             android:exported="false" />
         <activity
-            android:name=".view.SplashSreenActivity"
+            android:name=".view.SignIn"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
