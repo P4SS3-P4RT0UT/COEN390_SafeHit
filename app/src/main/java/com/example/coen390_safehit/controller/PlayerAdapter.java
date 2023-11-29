@@ -34,8 +34,14 @@ public class PlayerAdapter extends ArrayAdapter<Player> {
         TextView itemName = convertView.findViewById(R.id.itemName);
         TextView itemDetail = convertView.findViewById(R.id.itemDetail);
         TextView initals = convertView.findViewById(R.id.initials);
+        TextView warning = convertView.findViewById(R.id.warning);
 
         if (player != null) {
+            if (player.getMac() != null) {
+                warning.setVisibility(View.GONE);
+            } else {
+                warning.setVisibility(View.VISIBLE);
+            }
             itemName.setText(player.getFirstName() + " " + player.getLastName());
             itemDetail.setText(player.getPosition() + " #" + player.getNumber());
             initals.setText(player.getFirstName().substring(0, 1).toUpperCase() + player.getLastName().substring(0, 1).toUpperCase());

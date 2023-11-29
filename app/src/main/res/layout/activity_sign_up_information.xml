@@ -39,7 +39,8 @@
             android:layout_width="fill_parent"
             android:layout_height="50dp"
             android:backgroundTint="@color/white"
-            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
+            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ .-"
+            android:maxLength="26"
             android:hint="@string/firstname"
             android:inputType="text"
             android:textColor="@color/white"
@@ -61,8 +62,9 @@
             android:layout_width="fill_parent"
             android:layout_height="50dp"
             android:backgroundTint="@color/white"
-            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
+            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ .-"
             android:hint="@string/lastname"
+            android:maxLength="26"
             android:inputType="text"
             android:textColor="@color/white"
             android:textSize="24sp" />
@@ -105,6 +107,9 @@
                 android:layout_height="50dp"
                 android:backgroundTint="@color/white"
                 android:hint="@string/teamname"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 1234567890-._(),"
+                android:maxLength="24"
+                android:textSize="24sp"
                 android:textColor="@color/white" />
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>

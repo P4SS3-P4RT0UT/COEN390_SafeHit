@@ -7,14 +7,17 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.coen390_safehit.R;
@@ -23,9 +26,9 @@ import com.example.coen390_safehit.model.Position;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class UpdateInformationActivity extends AppCompatActivity {
-    AutoCompleteTextView  teamDropdown, positionDropdown;
-    LinearLayout coachLayout, playerLayout, trainerLayout;
-    Button saveButton;
+    Spinner teamDropdown, positionDropdown;
+    LinearLayout coachLayout, playerLayout;
+    Button saveButton, backButton;
     TextInputEditText firstName, lastName;
     TextInputEditText teamName;
     TextInputEditText number;
@@ -36,20 +39,22 @@ public class UpdateInformationActivity extends AppCompatActivity {
     String uid;
     String type;
 
-    private Toolbar toolbar;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_information);
+
         uid = getIntent().getStringExtra("pid");
         type = getIntent().getStringExtra("type");
-        firstName= findViewById(R.id.firstName);
+        firstName = findViewById(R.id.firstname_field);
         db.firstName = firstName;
-        lastName = findViewById(R.id.lastName);
+        lastName = findViewById(R.id.lastname_field);
         db.lastName = lastName;
-        setupToolBar();
+
+        backButton = findViewById(R.id.backButton4);
+        backButton.setOnClickListener(v -> finish());
+
         // Setup all user layouts (player, coach, trainer)
         setupUserLayouts();
 
@@ -71,12 +76,12 @@ public class UpdateInformationActivity extends AppCompatActivity {
     private void loadPlayerInformation() {
         db.getPlayerInformationFromPlayerID(uid);
     }
+
     // To setup all possible user layouts
     public void setupUserLayouts() {
         // Layout of coach, player, and trainer
         coachLayout = findViewById(R.id.coach_layout);
         playerLayout = findViewById(R.id.player_layout);
-        trainerLayout = findViewById(R.id.trainer_layout);
     }
 
     // To setup layout fields available to all users
@@ -86,53 +91,32 @@ public class UpdateInformationActivity extends AppCompatActivity {
         loadPersonInfo();
         setupTypeLayout();
     }
-    private void setupToolBar() {
-        toolbar = findViewById(R.id.toolbarinfo);
-        toolbar.setTitle("User Information");
-        setSupportActionBar(toolbar);
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-        //Return to previous page
-        toolbar.setNavigationOnClickListener(v -> finish());
-
-    }
 
     // To enable the user type selection
     private void setupTypeLayout() {
-            // Set the layout visibility according to the type selection
-            if (type.equals("Coach")) {
-                // Show coach layout and enable fields specific to user type
-                coachLayout.setVisibility(LinearLayout.VISIBLE);
-                enableCoachReservedFields();
-                // Hide other layouts
-                playerLayout.setVisibility(LinearLayout.GONE);
-                trainerLayout.setVisibility(LinearLayout.GONE);
-            } else if (type.equals("Player")) {
-                // Show player layout and enable fields specific to user type
-                playerLayout.setVisibility(LinearLayout.VISIBLE);
-                enablePlayerReservedFields();
-                // Hide other layouts
-                coachLayout.setVisibility(LinearLayout.GONE);
-                trainerLayout.setVisibility(LinearLayout.GONE);
-            } else if (type.equals("Trainer")) {
-                // Show trainer layout and enable fields specific to user type
-                trainerLayout.setVisibility(LinearLayout.VISIBLE);
-                enableTrainerReservedFields();
-                // Hide other layouts
-                coachLayout.setVisibility(LinearLayout.GONE);
-                playerLayout.setVisibility(LinearLayout.GONE);
-            }
+        // Set the layout visibility according to the type selection
+        if (type.equals("Coach")) {
+            // Show coach layout and enable fields specific to user type
+            coachLayout.setVisibility(LinearLayout.VISIBLE);
+            enableCoachReservedFields();
+            // Hide other layouts
+            playerLayout.setVisibility(LinearLayout.GONE);
+        } else if (type.equals("Player")) {
+            // Show player layout and enable fields specific to user type
+            playerLayout.setVisibility(LinearLayout.VISIBLE);
+            enablePlayerReservedFields();
+            // Hide other layouts
+            coachLayout.setVisibility(LinearLayout.GONE);
+        }
     }
+
     // To setup the sign up button
     public void setupSaveButton() {
         // Setup the sign up button
         saveButton = findViewById(R.id.saveButton);
         saveButton.setOnClickListener(view -> {
             // Check for valid inputs
-            if(validUserInput()) {
+            if (validUserInput()) {
                 // Show progress bar
                 progressBar.setVisibility(View.VISIBLE);
                 // Add the user to the database
@@ -141,9 +125,9 @@ public class UpdateInformationActivity extends AppCompatActivity {
                         db.updateCoach(firstName.getText().toString(), lastName.getText().toString(), uid, teamName.getText().toString());
                         break;
                     case "Player":
-                        db.teamsList.get(teamDropdown.getText().toString());
+                        db.teamsList.get(teamDropdown.getSelectedItem().toString());
                         db.updatePerson(firstName.getText().toString(), lastName.getText().toString(), uid);
-                        db.updatePlayer(number.getText().toString(), positionDropdown.getText().toString(), db.teamsList.get(teamDropdown.getText().toString()), uid);
+                        db.updatePlayer(number.getText().toString(), positionDropdown.getSelectedItem().toString(), db.teamsList.get(teamDropdown.getSelectedItem().toString()), uid);
                         break;
                     case "Trainer":
                         db.updatePerson(firstName.getText().toString(), lastName.getText().toString(), uid);
@@ -158,28 +142,28 @@ public class UpdateInformationActivity extends AppCompatActivity {
     // To check if all user inputs are valid
     public boolean validUserInput() {
         // For all user types, check first name, last name, and user type
-        if(TextUtils.isEmpty(firstName.getText()) || TextUtils.isEmpty(lastName.getText()) || TextUtils.isEmpty(type)) {
+        if (TextUtils.isEmpty(firstName.getText()) || TextUtils.isEmpty(lastName.getText()) || TextUtils.isEmpty(type)) {
             showToast("Please fill all required fields");
             return false;
         }
-        switch(type) {
+        switch (type) {
             case "Coach":
                 // Check for team name
-                if(TextUtils.isEmpty(teamName.getText())) {
+                if (TextUtils.isEmpty(teamName.getText())) {
                     showToast("Please enter a team name");
                     return false;
                 }
                 break;
             case "Player":
                 // Check for team name, position, and number
-                if(TextUtils.isEmpty(teamDropdown.getText()) || TextUtils.isEmpty(positionDropdown.getText()) || TextUtils.isEmpty(number.getText())) {
+                if (TextUtils.isEmpty(teamDropdown.getSelectedItem().toString()) || TextUtils.isEmpty(positionDropdown.getSelectedItem().toString()) || TextUtils.isEmpty(number.getText())) {
                     showToast("Please fill all required fields");
                     return false;
                 }
                 break;
             case "Trainer":
                 // Check for team name
-                if(TextUtils.isEmpty(teamDropdown.getText())) {
+                if (TextUtils.isEmpty(teamDropdown.getSelectedItem().toString())) {
                     showToast("Please select a team from the dropdown menu");
                     return false;
                 }
@@ -210,30 +194,26 @@ public class UpdateInformationActivity extends AppCompatActivity {
     public void enableCoachReservedFields() {
         // To enter team name
         teamName = findViewById(R.id.teamname_field);
-    }
-
-    public void enableTrainerReservedFields() {
-        // Dropdown menu to select the trainer's team
-        setupTeamDropdown();
+        teamName.setText(DatabaseHelper.currentTeamName);
     }
 
     // To setup the dropdown for a player's position (players only)
     private void setupPositionDropdown() {
         positionDropdown = findViewById(R.id.position_field_dropdown);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, Position.getPositionList());
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, Position.getPositionList());
+        adapter.setDropDownViewResource(R.layout.spinner_item);
         positionDropdown.setAdapter(adapter);
-        positionDropdown.setOnItemClickListener((adapterView, view, i, l) -> {
-            position = adapterView.getItemAtPosition(i).toString();
-        });
+        //TODO set the position to the player's current position
     }
 
     // To setup the dropdown menu for teams (players and trainers only)
     private void setupTeamDropdown() {
         teamDropdown = findViewById(R.id.teamnamePlayer_dropdown);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, db.getTeams());
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, db.getTeams());
+        adapter.setDropDownViewResource(R.layout.spinner_item);
         teamDropdown.setAdapter(adapter);
+
+        //TODO set the team to the player's current team
     }
 }
 

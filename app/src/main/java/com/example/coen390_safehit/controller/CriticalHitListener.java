@@ -24,25 +24,21 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class CriticalHitListener {
 
     private DatabaseReference criticalHitRef;
-    DatabaseHelper database;
     Context context;
 
     // Use your own channel ID and notification ID
     private static final String CHANNEL_ID = "COACH_CHANNEL";
     private int notificationId = 1; // Initial value for notification ID
 
-    public CriticalHitListener(Context context) {
+    public CriticalHitListener() {
         // Initialize the database helper
-        this.context = context;
-        database = DatabaseHelper.getInstance(this.context);
         // Initialize database reference (hard hit node)
         criticalHitRef = FirebaseDatabase.getInstance("https://safehit-3da2b-default-rtdb.europe-west1.firebasedatabase.app/")
                 .getReference()
-                .child("08:D1:F9:A4:F7:38")
+                .child(DatabaseHelper.macAddress)
                 .child("hit");
 
-        // Read the data once
-        criticalHitRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        criticalHitRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {

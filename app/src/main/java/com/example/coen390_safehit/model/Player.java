@@ -1,5 +1,6 @@
 package com.example.coen390_safehit.model;
 
+import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.google.type.DateTime;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class Player extends Person {
         super();
     }
 
-    public Player(String email, String firstName, String lastName, String pid, int number, String position, String team, String status, String suggestion) {
+    public Player(String email, String firstName, String lastName, String pid, int number, String position, String team, String status, String suggestion, String mac) {
         super(email, firstName, lastName);
         this.pid = pid;
         this.number = number;
@@ -32,6 +33,7 @@ public class Player extends Person {
         this.team = team;
         this.status = status;
         this.suggestion = suggestion;
+        this.mac = mac;
     }
 
     // Getters and setters
@@ -49,6 +51,7 @@ public class Player extends Person {
     }
 
     public void setMac(String mac) {
+        DatabaseHelper.updatePlayerMac(mac, pid);
         this.mac = mac;
     }
 

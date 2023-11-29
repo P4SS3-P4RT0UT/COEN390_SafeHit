@@ -74,7 +74,12 @@ public class CoachProfileActivity extends AppCompatActivity {
         playerListView.setOnItemClickListener((adapterView, view, position, l) -> {
             selectedProfile = (Player) adapterView.getItemAtPosition(position);
 
+            if (selectedProfile.getMac() == null) {
+                Toast.makeText(this, "Player does not have a device connected", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(this, CoachDataOverviewActivity.class);
+            intent.putExtra("mac", selectedProfile.getMac());
             startActivity(intent);
         });
     }
@@ -90,7 +95,7 @@ public class CoachProfileActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             DocumentSnapshot person = task.getResult();
                             if (person.exists()) {
-                                Player p = new Player(person.getString("Email"), person.getString("FirstName"), person.getString("LastName"), player.getString("PID"), Integer.parseInt(player.getString("Number")), player.getString("Position"), person.getString("Team"), player.getString("Status"), player.getString("Suggestion"));
+                                Player p = new Player(person.getString("Email"), person.getString("FirstName"), person.getString("LastName"), player.getString("PID"), Integer.parseInt(player.getString("Number")), player.getString("Position"), person.getString("Team"), player.getString("Status"), player.getString("Suggestion"), player.getString("mac"));
                                 Log.d("Player", person.getString("FirstName") + " " + person.getString("LastName") + ", " + player.getString("Position") + ", " + player.getString("Number"));
                                 String playerText = person.getString("FirstName") + " " + person.getString("LastName") + ", " + player.getString("Position") + ", " + player.getString("Number");
                                 playerslist.add(p);
@@ -127,6 +132,8 @@ public class CoachProfileActivity extends AppCompatActivity {
                 });
 
                 teamAdapter.notifyDataSetChanged();
+                DatabaseHelper.currentTeamID = db.teamsList.get(currentTeamName);
+                DatabaseHelper.currentTeamName = currentTeamName;
                 loadPlayers();
             }
 
@@ -144,9 +151,10 @@ public class CoachProfileActivity extends AppCompatActivity {
     private boolean isFirstLoad = true;
 
     private void setupTeamSpinner() {
-        teamAdapter = new ArrayAdapter<>(this, R.layout.custom_spinner_item, teamsList);
-        teamAdapter.setDropDownViewResource(R.layout.custom_spinner_item);
+        teamAdapter = new ArrayAdapter<>(this, R.layout.spinner_item_coach, teamsList);
+        teamAdapter.setDropDownViewResource(R.layout.spinner_item_coach);
         teamSpinner.setAdapter(teamAdapter);
+
 
         //Once teamSpinner changes run switchTeams()
         teamSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

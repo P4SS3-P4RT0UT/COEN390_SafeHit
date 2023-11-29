@@ -36,6 +36,14 @@ public class SignUp extends AppCompatActivity {
         setupProgressBar();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        progressBar.setVisibility(View.GONE);
+        signUp.setVisibility(View.VISIBLE);
+
+    }
+
     void setupEditTextFields() {
         email = findViewById(R.id.editTextSignUpEmail);
         password = findViewById(R.id.editTextSignUpPassword);

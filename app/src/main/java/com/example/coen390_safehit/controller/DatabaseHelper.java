@@ -15,17 +15,23 @@ import com.example.coen390_safehit.model.Player;
 import com.example.coen390_safehit.view.CoachDataOverviewActivity;
 import com.example.coen390_safehit.view.CoachProfileActivity;
 import com.example.coen390_safehit.view.PlayerProfileActivity;
+import com.example.coen390_safehit.view.SettingsActivity;
 import com.example.coen390_safehit.view.UpdateInformationActivity;
+import com.example.coen390_safehit.view.SignIn;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
+
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,12 +44,14 @@ public class DatabaseHelper {
     public HashMap<String, String> teamsList = new HashMap<>();
 
     public static String personID;
+    public static String playerID;
     public static String personType;
     public static String currentTeamID;
     public static String currentTeamName;
     private static Context currentContext;
 
     public static String threshold;
+    public static String macAddress;
 
     public TextView playerStatus;
     public TextView coachSuggestion;
@@ -73,7 +81,7 @@ public class DatabaseHelper {
         void onFailure(Exception e);
     }
 
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    static FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     //================================================================================
     // region Add Person, Player, Team and Coach to database
@@ -251,20 +259,17 @@ public class DatabaseHelper {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
-                        addTeams(teamname, uid, new AddCallback() {
-                            @Override
-                            public void onSuccess(String teamID) {
-                                currentTeamID = teamID;
-                                Toast.makeText(currentContext, "Information Updated and Team Added successfully", Toast.LENGTH_SHORT).show();
-                                Intent coachProfile = new Intent(currentContext, CoachProfileActivity.class);
-                                currentContext.startActivity(coachProfile);
-                            }
-
-                            @Override
-                            public void onFailure(Exception e) {
-                                Toast.makeText(currentContext, "Failed to update information and add team", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                        db.collection("Teams")
+                                .document(currentTeamID)
+                                .update("TeamName", teamname)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+                                        Toast.makeText(currentContext, "Information Updated successfully", Toast.LENGTH_SHORT).show();
+                                        Intent coachProfile = new Intent(currentContext, CoachProfileActivity.class);
+                                        currentContext.startActivity(coachProfile);
+                                    }
+                                });
                     }
 
                 });
@@ -328,6 +333,35 @@ public class DatabaseHelper {
                 });
     }
 
+    public static void updatePlayerMac(String mac, String uid) {
+        db.collection("Players")
+                .whereEqualTo("PID", uid)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+                        String documentID = documentSnapshot.getId();
+                        db.collection("Players")
+                                .document(documentID)
+                                .update("mac", mac)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+                                        macAddress = mac;
+                                        Toast.makeText(currentContext, "Device connected", Toast.LENGTH_SHORT).show();
+                                        SettingsActivity.resetLinkButton(currentContext);
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(currentContext, "Failed to connect device", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    }
+                });
+    }
+
 
     //================================================================================
     // region Get Person, Player, Team and Coach from database
@@ -340,6 +374,9 @@ public class DatabaseHelper {
 
     //Returns TeamID and TeamName
     public void getTeamsFromCoachID(String coachID, FetchCallback callback) {
+        if (coachID == null)
+            return;
+
         teamsList.clear();
         db.collection("Teams")
                 .whereEqualTo("CoachID", coachID)
@@ -370,6 +407,9 @@ public class DatabaseHelper {
 
     //Returns PlayerID
     public String getPlayersFromTeamID(String teamID, FetchCallback callback) {
+        if (teamID == null)
+            return null;
+
         db.collection("Players")
                 .whereEqualTo("TeamID", teamID)
                 .get()
@@ -418,6 +458,9 @@ public class DatabaseHelper {
 
 
     public void getPersonFromEmail(String email, FetchCallback callback) {
+        if (email == null)
+            return;
+
         db.collection("Person")
                 .whereEqualTo("Email", email)
                 .get()
@@ -439,6 +482,9 @@ public class DatabaseHelper {
     }
 
     public String getStatus(String personID) {
+        if (personID == null)
+            return null;
+
         db.collection("Players")
                 .whereEqualTo("PID", personID)
                 .get()
@@ -461,6 +507,9 @@ public class DatabaseHelper {
     }
 
     public String getSuggestion(String personID) {
+        if (personID == null)
+            return null;
+
         db.collection("Players")
                 .whereEqualTo("PID", personID)
                 .get()
@@ -481,7 +530,10 @@ public class DatabaseHelper {
         return null;
     }
 
-    public void getPlayerNameFromPlayerID(String personID) {
+    public void getPlayerNameFromPlayerID(String personID, Context context) {
+        if (personID == null)
+            return;
+
         db.collection("Person")
                 .document(personID)
                 .get()
@@ -492,6 +544,7 @@ public class DatabaseHelper {
                             DocumentSnapshot document = task.getResult();
                             Log.d(TAG, document.getId() + " => " + document.getData());
                             playerName.setText((document.getString("FirstName") + " " + document.getString("LastName")));
+
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
@@ -505,13 +558,70 @@ public class DatabaseHelper {
                     if (task.isSuccessful()) {
                         for (DocumentSnapshot document : task.getResult()) {
                             Log.d(TAG, document.getId() + " => " + document.getData());
+                            playerID = document.getId();
                             currentTeamID = document.getString("TeamID");
+                            macAddress = document.getString("mac");
+                            if (macAddress == null)
+                                // TODO: CHANGE TO NULL
+                                macAddress = null;
                             getPlayerCoachThreshold();
+                            PlayerProfileActivity.updateButton(context);
                         }
                     } else {
                         Log.d(TAG, "Error getting documents: ", task.getException());
                     }
                 });
+    }
+
+    public void unlinkDevice(Context context, String uid) {
+        if (playerID != null) {
+            db.collection("Players")
+                    .document(playerID)
+                    .update("mac", null)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Toast.makeText(context, "Device unlinked successfully", Toast.LENGTH_SHORT).show();
+                            macAddress = null;
+                            SettingsActivity.resetLinkButton(context);
+                        }
+                    });
+        } else {
+            db.collection("Players")
+                    .whereEqualTo("PID", uid)
+                    .get()
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                                // Update each document
+                                db.collection("Players").document(documentSnapshot.getId())
+                                        .update("mac", null)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Toast.makeText(context, "Device unlinked successfully", Toast.LENGTH_SHORT).show();
+                                                SettingsActivity.resetLinkButton(context);
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(context, "Failed to unlink device", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(context, "Failed to unlink device", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+
+
     }
 
     public String getUserTypeFromPlayerID(String personID) {
@@ -535,6 +645,9 @@ public class DatabaseHelper {
     }
 
     public String getPersonInfoFromPlayerID(String personID) {
+        if (personID == null)
+            return null;
+
         db.collection("Person")
                 .document(personID)
                 .get()
@@ -563,6 +676,9 @@ public class DatabaseHelper {
     }
 
     public String getPlayerInformationFromPlayerID(String personID) {
+        if (personID == null)
+            return null;
+
         db.collection("Player")
                 .document(personID)
                 .get()
@@ -586,6 +702,9 @@ public class DatabaseHelper {
     }
 
     public void getPlayerCoachThreshold() {
+        if (currentTeamID == null)
+            return;
+
         db.collection("Teams")
                 .document(currentTeamID)
                 .get()
@@ -610,11 +729,119 @@ public class DatabaseHelper {
     }
 
     //================================================================================
+    // Delete person, player, team from database
+    //================================================================================
+    public void deleteAccount(String uid, String type) {
+
+        String personsCollection = "Person";
+
+        // Build the path to the user document in the persons collection
+        String personDocumentPath = personsCollection + "/" + uid;
+
+        // Get the reference to the user document
+        DocumentReference personDocumentRef = db.document(personDocumentPath);
+
+        // Delete the user document from the persons collection
+        personDocumentRef
+                .delete()
+                .addOnCompleteListener(personTask -> {
+                    if (personTask.isSuccessful()) {
+                        // Document deleted successfully
+                        if (type.equals("Player")) {
+                            // If the user is a player, also delete their player document
+                            deletePlayerDocument(uid);
+                        } else if (type.equals("Coach")) {
+                            // If the user is a coach, also delete their team and remove coach ID
+                            deleteCoachTeam(uid);
+                        } else {
+                            Intent intent = new Intent(currentContext, SignIn.class);
+                            currentContext.startActivity(intent);
+                            Toast.makeText(currentContext, "Account deleted successfully", Toast.LENGTH_SHORT).show();
+                        }
+                        deleteUserFromFirebase();
+                    } else {
+                        // Handle the exception if deletion fails for the person document
+                        Toast.makeText(currentContext, "Failed to delete account: " + personTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    public void deleteUserFromFirebase() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        user.delete()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "User account deleted.");
+                    }
+                });
+    }
+
+    private void deletePlayerDocument(String uid) {
+        db.collection("Players")
+                .whereEqualTo("PID", uid)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            String playerDocumentId = document.getId();
+                            db.collection("Players")
+                                    .document(playerDocumentId)
+                                    .delete()
+                                    .addOnCompleteListener(playerTask -> {
+                                        if (playerTask.isSuccessful()) {
+                                            // Player document deleted successfully
+                                            // Navigate to the login screen
+                                            Intent intent = new Intent(currentContext, SignIn.class);
+                                            currentContext.startActivity(intent);
+                                            Toast.makeText(currentContext, "Account deleted successfully", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            // Handle the exception if deletion fails for the player document
+                                            Toast.makeText(currentContext, "Failed to delete account: " + playerTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    } else {
+                        // Handle the exception if fetching the player document fails
+                        Toast.makeText(currentContext, "Failed to delete account: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // Method to delete a coach's team and remove coach ID from the team document
+    private void deleteCoachTeam(String coachUid) {
+        db.collection("Teams")
+                .whereEqualTo("CoachID", coachUid)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            String teamDocumentId = document.getId();
+                            db.collection("Teams")
+                                    .document(teamDocumentId)
+                                    .delete()
+                                    .addOnCompleteListener(teamTask -> {
+                                        if (teamTask.isSuccessful()) {
+                                            // Team document deleted successfully
+                                            // Navigate to the login screen
+                                            Intent intent = new Intent(currentContext, SignIn.class);
+                                            currentContext.startActivity(intent);
+                                            Toast.makeText(currentContext, "Account deleted successfully", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            // Handle the exception if deletion fails for the team document
+                                            Toast.makeText(currentContext, "Failed to delete account: " + teamTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    } else {
+                        // Handle the exception if fetching the coach's team document fails
+                        Toast.makeText(currentContext, "Failed to delete account: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+    //================================================================================
     // endregion
     //================================================================================
-    public void updatePlayerName() {
-
-    }
 }
 
 
