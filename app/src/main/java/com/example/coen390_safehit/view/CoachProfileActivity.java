@@ -100,6 +100,11 @@ public class CoachProfileActivity extends AppCompatActivity {
         super.onStart();
     }
 
+    @Override
+    public void onBackPressed() {
+    }
+
+
     private void setupPlayerList() {
         playerAdapter = new PlayerAdapter(this, playerslist);
         playerListView.setAdapter(playerAdapter);
@@ -153,6 +158,11 @@ public class CoachProfileActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onEmpty() {
+                Toast.makeText(CoachProfileActivity.this, "No players found", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
             public void onError(Exception e) {
                 Toast.makeText(CoachProfileActivity.this, "Error loading players", Toast.LENGTH_SHORT).show();
             }
@@ -176,6 +186,11 @@ public class CoachProfileActivity extends AppCompatActivity {
                 DatabaseHelper.currentTeamID = db.teamsList.get(currentTeamName);
                 DatabaseHelper.currentTeamName = currentTeamName;
                 loadPlayers();
+            }
+
+            @Override
+            public void onEmpty() {
+                Toast.makeText(CoachProfileActivity.this, "No teams found", Toast.LENGTH_SHORT).show();
             }
 
             @Override

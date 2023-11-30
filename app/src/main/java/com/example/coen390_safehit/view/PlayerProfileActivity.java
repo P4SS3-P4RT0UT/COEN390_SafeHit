@@ -49,6 +49,10 @@ public class PlayerProfileActivity extends AppCompatActivity {
         loadSuggestion();
     }
 
+    @Override
+    public void onBackPressed() {
+    }
+
     public static void updateButton(Context context) {
         label:
         if (DatabaseHelper.macAddress == null) {

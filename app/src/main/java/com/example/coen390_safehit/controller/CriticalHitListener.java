@@ -5,8 +5,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.util.Log;
+import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -22,6 +24,12 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 public class CriticalHitListener {
 
     private DatabaseReference criticalHitRef;
@@ -31,7 +39,7 @@ public class CriticalHitListener {
     private static final String CHANNEL_ID = "COACH_CHANNEL";
     private int notificationId = 1; // Initial value for notification ID
 
-    public CriticalHitListener(Context context, String macAddress, String playerName) {
+    public CriticalHitListener(Context context, String macAddress, String playerName, TextView lastHit) {
         this.context = context; // Set the context
 
         // Initialize database reference (hard hit node)
@@ -40,7 +48,7 @@ public class CriticalHitListener {
                 .child(macAddress)
                 .child("hit");
 
-        criticalHitRef.addValueEventListener(new ValueEventListener() {
+        criticalHitRef.limitToLast(1).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -48,9 +56,29 @@ public class CriticalHitListener {
                         String hitValue = hitSnapshot.getValue(String.class);
                         if (hitValue != null) {
                             String[] hit = hitValue.split("\\|");
-                            if (Double.parseDouble(hit[1]) <= 8) {
-                                sendNotificationToCoach(DatabaseHelper.macAddress, playerName.toUpperCase() + ": Critical hit of " + hit[1] + " g detected", hit[0].split("@")[1]);
-                                break;
+                            double threshold = Double.parseDouble(DatabaseHelper.threshold);
+                            String dateTimeOfHit = hit[0];
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy@HH:mm:ss", Locale.getDefault());
+
+                            try {
+                                Date hitDate = sdf.parse(dateTimeOfHit);
+                                long currentTime = System.currentTimeMillis();
+                                long timeOfHit = hitDate.getTime();
+
+                                // Check if the hit was recorded today and within the last 5 minutes
+                                lastHit.setText("Last hit: " + hit[1] + " " + sdf.format(hitDate).split("@")[1]);
+
+                                if (isToday(hitDate) && (currentTime - timeOfHit <= 300000) && Double.parseDouble(hit[1]) > threshold) {
+                                    // Send a notification to the coach
+                                    lastHit.setTextColor(Color.YELLOW);
+                                    sendNotificationToCoach(DatabaseHelper.macAddress, playerName.toUpperCase() + ": Hard hit of " + hit[1] + " g detected", sdf.format(hitDate));
+
+                                    break;
+                                } else {
+                                    lastHit.setTextColor(Color.WHITE);
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
                             }
                             Log.d("FIREBASE REAL-TIME EVENT DETECTED", "Critical hit of " + hitValue + " g detected, sending notification to coach...");
                         }
@@ -59,6 +87,16 @@ public class CriticalHitListener {
                     // Handle the case where the 'Hard hit' node does not exist or is empty
                     Log.d("FirebaseData", "No hard hits recorded");
                 }
+            }
+
+            // Helper method to check if the date is today
+            private boolean isToday(Date date) {
+                Calendar today = Calendar.getInstance();
+                Calendar specifiedDate = Calendar.getInstance();
+                specifiedDate.setTime(date);
+
+                return today.get(Calendar.YEAR) == specifiedDate.get(Calendar.YEAR) &&
+                        today.get(Calendar.DAY_OF_YEAR) == specifiedDate.get(Calendar.DAY_OF_YEAR);
             }
 
             @Override

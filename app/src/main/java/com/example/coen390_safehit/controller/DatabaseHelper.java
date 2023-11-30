@@ -372,6 +372,8 @@ public class DatabaseHelper {
     public interface FetchCallback {
         void onComplete();
 
+        void onEmpty();
+
         void onError(Exception e);
     }
 
@@ -479,6 +481,8 @@ public class DatabaseHelper {
                                 threshold = task.getResult().getDocuments().get(0).get("Threshold").toString();
                             Log.d(TAG, personID + " => " + task.getResult().getDocuments().get(0).getData());
                             callback.onComplete();
+                        } else {
+                            callback.onEmpty();
                         }
                     } else {
                         Log.d(TAG, "Error getting documents: ", task.getException());
@@ -727,6 +731,7 @@ public class DatabaseHelper {
                                 UpdateInformationActivity.positionDropdown.setSelection(positionIndex);
                             }
 
+                            UpdateInformationActivity.teamAdapter.notifyDataSetChanged();
 
                             UpdateInformationActivity.number.setText(number);
                         }
@@ -810,6 +815,8 @@ public class DatabaseHelper {
 
     public void deleteUserFromFirebase() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null)
+            return;
 
         user.delete()
                 .addOnCompleteListener(task -> {
@@ -821,28 +828,38 @@ public class DatabaseHelper {
 
     private void deletePlayerDocument(String uid) {
         db.collection("Players")
-                .whereEqualTo("PID", uid)
+                .document(uid)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        for (DocumentSnapshot document : task.getResult()) {
-                            String playerDocumentId = document.getId();
-                            db.collection("Players")
-                                    .document(playerDocumentId)
-                                    .delete()
-                                    .addOnCompleteListener(playerTask -> {
-                                        if (playerTask.isSuccessful()) {
-                                            // Player document deleted successfully
-                                            // Navigate to the login screen
-                                            Intent intent = new Intent(currentContext, SignIn.class);
-                                            currentContext.startActivity(intent);
-                                            Toast.makeText(currentContext, "Account deleted successfully", Toast.LENGTH_SHORT).show();
-                                        } else {
-                                            // Handle the exception if deletion fails for the player document
-                                            Toast.makeText(currentContext, "Failed to delete account: " + playerTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                        }
+                        String playerDocumentId = task.getResult().getId();
+                        String personDocumentId = task.getResult().getString("PID");
+
+                        db.collection("Players")
+                                .document(playerDocumentId)
+                                .delete()
+                                .addOnCompleteListener(playerTask -> {
+                                    if (playerTask.isSuccessful()) {
+                                        db.collection("Person")
+                                                .document(personDocumentId)
+                                                .delete()
+                                                .addOnCompleteListener(playerTask2 -> {
+                                                    if (playerTask2.isSuccessful()) {
+
+                                                        Toast.makeText(currentContext, "Person deleted successfully", Toast.LENGTH_SHORT).show();
+                                                    } else {
+                                                        // Handle the exception if deletion fails for the player document
+                                                        Toast.makeText(currentContext, "Failed to delete account: " + playerTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                        Toast.makeText(currentContext, "Player deleted successfully", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        // Handle the exception if deletion fails for the player document
+                                        Toast.makeText(currentContext, "Failed to delete account: " + playerTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
+
                     } else {
                         // Handle the exception if fetching the player document fails
                         Toast.makeText(currentContext, "Failed to delete account: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -868,16 +885,28 @@ public class DatabaseHelper {
                                             // Navigate to the login screen
                                             Intent intent = new Intent(currentContext, SignIn.class);
                                             currentContext.startActivity(intent);
-                                            Toast.makeText(currentContext, "Account deleted successfully", Toast.LENGTH_SHORT).show();
+                                            deleteTeamPlayers(teamDocumentId);
+                                            Toast.makeText(currentContext, "Team deleted successfully", Toast.LENGTH_SHORT).show();
                                         } else {
                                             // Handle the exception if deletion fails for the team document
-                                            Toast.makeText(currentContext, "Failed to delete account: " + teamTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(currentContext, "Failed to delete team: " + teamTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                         }
                                     });
                         }
                     } else {
                         // Handle the exception if fetching the coach's team document fails
                         Toast.makeText(currentContext, "Failed to delete account: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void deleteTeamPlayers(String teamID) {
+        db.collection("Players")
+                .whereEqualTo("TeamID", teamID)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                        deleteAccount(documentSnapshot.getId(), "Player");
                     }
                 });
     }

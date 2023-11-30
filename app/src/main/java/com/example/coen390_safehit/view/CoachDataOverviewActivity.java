@@ -103,14 +103,7 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
                     }
 
                     progressBar.setVisibility(View.GONE);
-                    backButton.setVisibility(View.VISIBLE);
-                    editButton.setVisibility(View.VISIBLE);
 
-                    linearLayout.setVisibility(View.VISIBLE);
-                    cardViewPlayerData.setVisibility(View.VISIBLE);
-                    cardViewPlayerSuggestion.setVisibility(View.VISIBLE);
-                    cardViewPlayerStatus.setVisibility(View.VISIBLE);
-                    dataButton.setVisibility(View.VISIBLE);
                     createGraph();
 
 
@@ -137,7 +130,6 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
     private void setupToolBar() {
         TextView title = findViewById(R.id.toolbar_title);
         title.setText(player.getFirstName() + " " + player.getLastName());
-        title.setVisibility(View.VISIBLE);
 
         backButton = findViewById(R.id.backButton3);
         backButton.setOnClickListener(view -> finish());
@@ -207,6 +199,7 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
     void createGraph() {
         PieChart pieChart = findViewById(R.id.pie_chart);
 
+        pieChart.setVisibility(View.VISIBLE);
         ArrayList<PieEntry> entries = new ArrayList<>();
         entries.add(new PieEntry(softHitCount, "Soft Hit"));
         entries.add(new PieEntry(hardHitCount, "Hard Hit"));
@@ -217,6 +210,9 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
         dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
         dataSet.setValueTextSize(13f);
 
+        dataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+        pieChart.setEntryLabelColor(Color.WHITE);
+
         dataSet.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -225,10 +221,14 @@ public class CoachDataOverviewActivity extends AppCompatActivity {
             }
         });
 
+        dataSet.setValueLinePart1Length(0.3f); // Adjust the line length
+        dataSet.setValueLinePart2Length(0.3f);
+        dataSet.setValueLineColor(Color.WHITE);
+
+
         PieData data = new PieData(dataSet);
         pieChart.setData(data);
         pieChart.setDescription(null);
-        pieChart.setEntryLabelColor(R.color.black);
         pieChart.setHoleColor(Color.TRANSPARENT);
         pieChart.setTransparentCircleColor(Color.BLACK);
 
