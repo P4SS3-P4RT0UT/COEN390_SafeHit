@@ -26,12 +26,12 @@ import com.example.coen390_safehit.model.Position;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class UpdateInformationActivity extends AppCompatActivity {
-    Spinner teamDropdown, positionDropdown;
+    static public Spinner teamDropdown, positionDropdown;
     LinearLayout coachLayout, playerLayout;
     Button saveButton, backButton;
     TextInputEditText firstName, lastName;
     TextInputEditText teamName;
-    TextInputEditText number;
+    static public TextInputEditText number;
     ProgressBar progressBar;
     DatabaseHelper db = DatabaseHelper.getInstance(this);
 
@@ -74,7 +74,7 @@ public class UpdateInformationActivity extends AppCompatActivity {
     }
 
     private void loadPlayerInformation() {
-        db.getPlayerInformationFromPlayerID(uid);
+        db.getPlayerInformationFromPlayerID(uid, this);
     }
 
     // To setup all possible user layouts
@@ -89,6 +89,8 @@ public class UpdateInformationActivity extends AppCompatActivity {
         // Input text for first name, last name
 
         loadPersonInfo();
+
+
         setupTypeLayout();
     }
 
@@ -212,6 +214,9 @@ public class UpdateInformationActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, db.getTeams());
         adapter.setDropDownViewResource(R.layout.spinner_item);
         teamDropdown.setAdapter(adapter);
+
+        if (type.equals("Player"))
+            loadPlayerInformation();
 
         //TODO set the team to the player's current team
     }

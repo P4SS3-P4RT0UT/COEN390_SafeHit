@@ -8,6 +8,29 @@
     android:background="@drawable/background_color">
 
 
+    <Button
+        android:id="@+id/backButton3"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/ic_arrow_back"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/editButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/ic_edit"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="100dp"
@@ -20,30 +43,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/player_data_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
+    <TextView
+        android:id="@+id/toolbar_title"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:text="Player Name"
+        android:textColor="@color/white"
+        android:textSize="35sp"
+        android:textStyle="bold"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/toolbar_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Player Name"
-            android:textColor="@color/white"
-            android:textSize="35sp"
-            android:textStyle="bold" />
-
-
-    </androidx.appcompat.widget.Toolbar>
+        app:layout_constraintEnd_toStartOf="@+id/editButton"
+        app:layout_constraintStart_toEndOf="@+id/backButton3"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <LinearLayout
@@ -53,7 +66,7 @@
         android:orientation="horizontal"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/player_data_toolbar">
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_title">
 
         <TextView
             android:id="@+id/coach_data_positiontext"
@@ -116,7 +129,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="30dp"
         android:layout_marginEnd="20dp"
-        android:visibility="gone"
+        android:visibility="visible"
 
         app:cardCornerRadius="16dp"
         app:cardElevation="16dp"
@@ -156,7 +169,7 @@
                 android:maxLength="25"
                 android:padding="10dp"
                 android:textAlignment="center"
-                android:textColor="@color/white"
+                android:textColor="@color/black"
                 android:textSize="24sp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="16dp"
@@ -175,7 +188,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="30dp"
         android:layout_marginEnd="20dp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:cardCornerRadius="16dp"
         app:cardElevation="16dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -280,8 +293,9 @@
         android:id="@+id/dataButton2"
         android:layout_width="fill_parent"
         android:layout_height="75dp"
-        android:background="@drawable/button_background"
+        android:background="@drawable/button_background_dark"
         android:text="View Data"
+        android:textColor="@color/white"
         android:textSize="24sp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"

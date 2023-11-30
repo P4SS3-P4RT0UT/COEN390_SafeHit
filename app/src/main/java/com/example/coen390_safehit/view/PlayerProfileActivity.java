@@ -21,7 +21,7 @@ public class PlayerProfileActivity extends AppCompatActivity {
     static Button dataButton;
 
     DatabaseHelper db = DatabaseHelper.getInstance(this);
-    static String playerID = DatabaseHelper.personID;
+    static String playerID;
 
     String userType;
 
@@ -40,6 +40,8 @@ public class PlayerProfileActivity extends AppCompatActivity {
         coachSuggestion = findViewById(R.id.textViewDisplaySuggestion);
         db.coachSuggestion = coachSuggestion;
         dataButton = findViewById(R.id.dataButton);
+
+        playerID = DatabaseHelper.personID;
 
         setupToolbar();
         loadPlayerName();

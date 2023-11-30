@@ -3,6 +3,7 @@ package com.example.coen390_safehit.view;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -81,6 +82,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_player_data_overview);
 
         playerID = getIntent().getStringExtra("pid");
+        String mac = getIntent().getStringExtra("mac");
 
 
         toolbar = findViewById(R.id.player_data_toolbar);
@@ -99,7 +101,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
             threshold = Float.parseFloat(DatabaseHelper.threshold);
         }
 
-        if (DatabaseHelper.macAddress != null)
+        if (mac != null || DatabaseHelper.macAddress != null)
             getHitData();
         else finish();
         setupToolBar();
@@ -111,8 +113,12 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
                 .child(DatabaseHelper.macAddress)
                 .child("hit");
 
-        hitRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        hitRef.addValueEventListener(new ValueEventListener() {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                hitCountArrayList.clear();
+                lastWeekHitArraylist.clear();
+                seasonHitArrayList.clear();
+
                 if (dataSnapshot.exists()) {
                     // Prepare the date format and calendar instances
                     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy@HH:mm:ss", Locale.getDefault());
@@ -169,9 +175,20 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
                         }
                     }
 
-                    createDirectionGraph(4, 8, "Hard hit");
-                    createSeasonGraph(4, 8, "Hard hit");
-                    createLastWeekGraph(4, 8, "Hard hit");
+                    if (hitTypeTextView.getText().equals("Soft Hit")) {
+                        createDirectionGraph(0, 4, "Soft hit");
+                        createSeasonGraph(0, 4, "Soft hit");
+                        createLastWeekGraph(0, 4, "Soft hit");
+                    } else if (hitTypeTextView.getText().equals("Hard Hit")) {
+                        createDirectionGraph(4, threshold, "Hard hit");
+                        createSeasonGraph(4, threshold, "Hard hit");
+                        createLastWeekGraph(4, threshold, "Hard hit");
+                    } else if (hitTypeTextView.getText().equals("Critical Hit")) {
+                        createDirectionGraph(threshold, 100, "Critical hit");
+                        createSeasonGraph(threshold, 100, "Critical hit");
+                        createLastWeekGraph(threshold, 100, "Critical hit");
+                    }
+
                     progressBar.setVisibility(View.GONE);
                     toolbar.setVisibility(View.VISIBLE);
                     nestedScrollView.setVisibility(View.VISIBLE);
@@ -330,7 +347,11 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
         lineDataSet.setDrawValues(false);
         lineDataSet.setDrawFilled(true);
-        lineDataSet.setFillColor(backgroundColor.toArgb());
+
+        GradientDrawable gradientDrawable = new GradientDrawable();
+        gradientDrawable.setShape(GradientDrawable.RECTANGLE);
+        gradientDrawable.setColors(new int[]{backgroundColor.toArgb(), Color.TRANSPARENT});
+        lineDataSet.setFillDrawable(gradientDrawable);
 
 
         LineData lineData = new LineData(lineDataSet);
@@ -391,7 +412,11 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         lineDataSet.setColor(Color.WHITE);
         lineDataSet.setDrawValues(false);  // Don't draw values on the chart
         lineDataSet.setDrawFilled(true);  // Fill the area under the line
-        lineDataSet.setFillColor(backgroundColor.toArgb());
+        
+        GradientDrawable gradientDrawable = new GradientDrawable();
+        gradientDrawable.setShape(GradientDrawable.RECTANGLE);
+        gradientDrawable.setColors(new int[]{backgroundColor.toArgb(), Color.TRANSPARENT});
+        lineDataSet.setFillDrawable(gradientDrawable);
 
         // Create the LineData object with the dataset
         LineData lineData = new LineData(lineDataSet);

@@ -1,6 +1,8 @@
 package com.example.coen390_safehit.view;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,12 +11,19 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
+
+import com.example.coen390_safehit.controller.CriticalHitListener;
 import com.example.coen390_safehit.controller.DatabaseHelper;
 import com.example.coen390_safehit.R;
 import com.example.coen390_safehit.controller.PlayerAdapter;
@@ -23,12 +32,13 @@ import com.example.coen390_safehit.model.Player;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
 public class CoachProfileActivity extends AppCompatActivity {
     // Layout elements
-    private Toolbar toolbar;
     private ListView playerListView;
     private Spinner teamSpinner;
     // Settings icon
@@ -45,20 +55,44 @@ public class CoachProfileActivity extends AppCompatActivity {
     private List<Player> playerslist = new ArrayList<>();
     PlayerAdapter playerAdapter;
 
+    private static final int REQUEST_CODE_POST_NOTIFICATIONS = 101;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coach_profile);
         db = DatabaseHelper.getInstance(this);
         coachID = DatabaseHelper.personID;
-        toolbar = findViewById(R.id.toolbar);
         teamSpinner = findViewById(R.id.teamList);
         playerListView = findViewById(R.id.playerList);
+        db.coachName = findViewById(R.id.coachName);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQUEST_CODE_POST_NOTIFICATIONS);
+            }
+        }
+
+        db.getPersonInfoFromPlayerID(coachID);
+        btnSettings = findViewById(R.id.btnSettings);
+        btnSettings.setOnClickListener(view -> goToSettings());
         loadTeams();
         setupTeamSpinner();
-        setupToolBar();
         setupPlayerList();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_POST_NOTIFICATIONS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission was granted, you can send notifications now
+            } else {
+                // Permission was denied, explain to the user that notifications will not work
+                Toast.makeText(this, "Permission denied for notifications", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override
@@ -98,6 +132,15 @@ public class CoachProfileActivity extends AppCompatActivity {
                                 String playerText = person.getString("FirstName") + " " + person.getString("LastName") + ", " + player.getString("Position") + ", " + player.getString("Number");
                                 playerslist.add(p);
                                 playerHashMap.put(playerText, p);
+                                // Assuming playerslist is of type List<Player>, and Player class has a getNumber method returning a String
+                                Collections.sort(playerslist, (p1, p2) -> {
+                                    // Parse the number strings to integer values for comparison
+                                    int num1 = p1.getNumber();
+                                    int num2 = p2.getNumber();
+                                    return Integer.compare(num1, num2);
+                                });
+
+
                                 playerAdapter.notifyDataSetChanged();
                             } else {
                                 // Handle the error
@@ -176,15 +219,6 @@ public class CoachProfileActivity extends AppCompatActivity {
         currentTeamName = teamSpinner.getSelectedItem().toString();
         currentTeamID = db.teamsList.get(currentTeamName);
         loadPlayers();
-    }
-
-    private void setupToolBar() {
-        toolbar.setTitle("");
-        toolbar.setNavigationIcon(null);
-        setSupportActionBar(toolbar);
-        // Settings icon
-        btnSettings = findViewById(R.id.btnSettings);
-        btnSettings.setOnClickListener(view -> goToSettings());
     }
 
     void goToSettings() {
