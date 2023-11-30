@@ -122,7 +122,10 @@ public class CoachProfileActivity extends AppCompatActivity {
     }
 
     private void loadPlayers() {
-        playerslist.clear();
+        if(playerslist.size()>0) {
+            playerAdapter.clear();
+            teamAdapter.notifyDataSetChanged();
+        }
         db.playerDocumentList.clear();
         db.getPlayersFromTeamID(currentTeamID, new DatabaseHelper.FetchCallback() {
             @Override
