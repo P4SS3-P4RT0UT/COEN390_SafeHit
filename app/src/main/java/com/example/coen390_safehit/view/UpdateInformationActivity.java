@@ -35,6 +35,8 @@ public class UpdateInformationActivity extends AppCompatActivity {
     ProgressBar progressBar;
     DatabaseHelper db = DatabaseHelper.getInstance(this);
 
+    static public ArrayAdapter<String> teamAdapter;
+
     String position;
     String uid;
     String type;
@@ -211,9 +213,10 @@ public class UpdateInformationActivity extends AppCompatActivity {
     // To setup the dropdown menu for teams (players and trainers only)
     private void setupTeamDropdown() {
         teamDropdown = findViewById(R.id.teamnamePlayer_dropdown);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, db.getTeams());
-        adapter.setDropDownViewResource(R.layout.spinner_item);
-        teamDropdown.setAdapter(adapter);
+        teamAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, db.getTeams());
+        teamAdapter.setDropDownViewResource(R.layout.spinner_item);
+        teamDropdown.setAdapter(teamAdapter);
+
 
         if (type.equals("Player"))
             loadPlayerInformation();

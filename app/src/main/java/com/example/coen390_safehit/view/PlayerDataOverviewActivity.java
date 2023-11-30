@@ -37,6 +37,7 @@ import com.github.mikephil.charting.data.PieEntry;
 
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.EntryXComparator;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -57,13 +58,15 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Semaphore;
 
 public class PlayerDataOverviewActivity extends AppCompatActivity {
     private Toolbar toolbar;
-
+    Semaphore semaphore = new Semaphore(1);
     private PieChart pieChart;
     private LineChart lineChart, lineChart2;
-    private TextView hitTypeTextView;
+    private TextView hitTypeTextView, cardViewPlayerDataText2;
 
     private Color backgroundColor;
     String playerID;
@@ -71,9 +74,10 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
     ProgressBar progressBar;
     NestedScrollView nestedScrollView;
 
-    ArrayList<String> hitCountArrayList = new ArrayList<>();
-    ArrayList<String> lastWeekHitArraylist = new ArrayList();
-    ArrayList<String> seasonHitArrayList = new ArrayList<>();
+    CopyOnWriteArrayList<String> snapShotArray = new CopyOnWriteArrayList<>();
+    CopyOnWriteArrayList<String> hitCountArrayList = new CopyOnWriteArrayList<>();
+    CopyOnWriteArrayList<String> lastWeekHitArraylist = new CopyOnWriteArrayList();
+    CopyOnWriteArrayList<String> seasonHitArrayList = new CopyOnWriteArrayList<>();
     float threshold;
 
     @Override
@@ -95,6 +99,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
 
         progressBar = findViewById(R.id.progressBar);
 
+        loadingScreen(true);
         if (DatabaseHelper.threshold == null) {
             threshold = 8;
         } else {
@@ -107,105 +112,194 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         setupToolBar();
     }
 
+    Date finalLastDataDate;
+
     void getHitData() {
         DatabaseReference hitRef = FirebaseDatabase.getInstance("https://safehit-3da2b-default-rtdb.europe-west1.firebasedatabase.app/")
                 .getReference()
                 .child(DatabaseHelper.macAddress)
                 .child("hit");
 
-        hitRef.addValueEventListener(new ValueEventListener() {
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                hitCountArrayList.clear();
-                lastWeekHitArraylist.clear();
-                seasonHitArrayList.clear();
-
-                if (dataSnapshot.exists()) {
-                    // Prepare the date format and calendar instances
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy@HH:mm:ss", Locale.getDefault());
-                    Calendar calendar = Calendar.getInstance();
-                    long currentTime = System.currentTimeMillis();
-
-                    // Time calculations
-                    long oneWeekMillis = 7L * 24 * 60 * 60 * 1000;
-                    long threeMonthsMillis = 3L * 30 * 24 * 60 * 60 * 1000; // Approximation of 3 months
-                    long threeMonthsAgo = currentTime - threeMonthsMillis;
-                    long oneWeekAgo = currentTime - oneWeekMillis;
-
-                    // Data structures to hold the hit data
-
-
-                    // Process each hit
-                    for (DataSnapshot hitSnapshot : dataSnapshot.getChildren()) {
-                        String hitValue = hitSnapshot.getValue(String.class);
-
-                        if (hitValue != null) {
-                            try {
-                                String[] parts = hitValue.split("\\|");
-                                Date date = dateFormat.parse(parts[0]);
-                                float gForce = Float.parseFloat(parts[1]);
-                                String direction = parts[2];
-
-                                direction = direction.replaceAll("Hit from ", "");
-                                hitCountArrayList.add(direction + "|" + gForce);
-
-                                if (date != null) {
-                                    long hitTime = date.getTime();
-
-                                    // For the last week graph
-                                    if (hitTime > oneWeekAgo) {
-                                        // Convert date to a float representing minutes since midnight
-                                        calendar.setTime(date);
-                                        float time = calendar.get(Calendar.HOUR_OF_DAY) * 60.0f + calendar.get(Calendar.MINUTE);
-                                        lastWeekHitArraylist.add(time + "|" + gForce);
-                                    }
-
-                                    // For the 3 months graph
-                                    if (hitTime > threeMonthsAgo) {
-                                        // Find which week this hit belongs to
-                                        long weeksSinceStart = (hitTime - threeMonthsAgo) / oneWeekMillis;
-                                        long weekStartMillis = threeMonthsAgo + (weeksSinceStart * oneWeekMillis);
-
-                                        // Increment the hit count for the corresponding week
-                                        seasonHitArrayList.add(weekStartMillis + "|" + gForce);
-                                    }
-                                }
-                            } catch (ParseException | NumberFormatException e) {
-                                Log.d("FirebaseData", "Error parsing hit value: " + hitValue);
-                            }
+        hitRef.limitToLast(1).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                        String hitValue = childSnapshot.getValue(String.class);
+                        Date lastDataDate = null;
+                        try {
+                            lastDataDate = new SimpleDateFormat("dd/MM/yyyy@HH:mm:ss", Locale.getDefault()).parse(hitValue.split("\\|")[0]);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
                         }
+
+                        finalLastDataDate = lastDataDate;
+
+
                     }
-
-                    if (hitTypeTextView.getText().equals("Soft Hit")) {
-                        createDirectionGraph(0, 4, "Soft hit");
-                        createSeasonGraph(0, 4, "Soft hit");
-                        createLastWeekGraph(0, 4, "Soft hit");
-                    } else if (hitTypeTextView.getText().equals("Hard Hit")) {
-                        createDirectionGraph(4, threshold, "Hard hit");
-                        createSeasonGraph(4, threshold, "Hard hit");
-                        createLastWeekGraph(4, threshold, "Hard hit");
-                    } else if (hitTypeTextView.getText().equals("Critical Hit")) {
-                        createDirectionGraph(threshold, 100, "Critical hit");
-                        createSeasonGraph(threshold, 100, "Critical hit");
-                        createLastWeekGraph(threshold, 100, "Critical hit");
-                    }
-
-                    progressBar.setVisibility(View.GONE);
-                    toolbar.setVisibility(View.VISIBLE);
-                    nestedScrollView.setVisibility(View.VISIBLE);
-
-                } else {
-                    // Handle the case where the data does not exist or is empty
-                    Log.d("FirebaseData", "No data recorded");
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle the error
-                Log.w("FirebaseData", "Database error: " + databaseError.getMessage());
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle errors...
+            }
+        });
+
+        hitRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Log.d("FirebaseData", "Adding data");
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            createGraphs(snapshot);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            Log.e("PlayerDataOverviewActivity", "Thread was interrupted", e);
+                        } finally {
+                            semaphore.release(); // Release semaphore after modifications are done
+                        }
+                        // If you need to update the UI based on the results, use runOnUiThread
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+
+                                if (hitTypeTextView.getText().equals("Soft Hit")) {
+                                    createDirectionGraph(0, 4, "Soft hit");
+                                    createSeasonGraph(0, 4, "Soft hit");
+                                    createLastWeekGraph(0, 4, "Soft hit");
+                                } else if (hitTypeTextView.getText().equals("Hard Hit")) {
+                                    createDirectionGraph(4, threshold, "Hard hit");
+                                    createSeasonGraph(4, threshold, "Hard hit");
+                                    createLastWeekGraph(4, threshold, "Hard hit");
+                                } else if (hitTypeTextView.getText().equals("Critical Hit")) {
+                                    createDirectionGraph(threshold, 100, "Critical hit");
+                                    createSeasonGraph(threshold, 100, "Critical hit");
+                                    createLastWeekGraph(threshold, 100, "Critical hit");
+                                }
+
+
+                                if (snapshot.getChildrenCount() > 1)
+                                    loadingScreen(false);
+                            }
+                        });
+                    }
+                }).start();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
     }
+
+    void createGraphs(DataSnapshot dataSnapshot) throws InterruptedException {
+        if (dataSnapshot.exists()) {
+            semaphore.acquire();
+            // Prepare the date format and calendar instances
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy@HH:mm:ss", Locale.getDefault());
+            Calendar calendar = Calendar.getInstance();
+            long currentTime = System.currentTimeMillis();
+
+            // Time calculations
+            long oneWeekMillis = 7L * 24 * 60 * 60 * 1000;
+            long threeMonthsMillis = 3L * 30 * 24 * 60 * 60 * 1000; // Approximation of 3 months
+            long threeMonthsAgo = currentTime - threeMonthsMillis;
+            long oneWeekAgo = currentTime - oneWeekMillis;
+
+            // Data structures to hold the hit data
+
+
+            // Process each hit
+            for (DataSnapshot hitSnapshot : dataSnapshot.getChildren()) {
+                String hitValue = hitSnapshot.getValue(String.class);
+                if (snapShotArray.contains(hitValue)) {
+                    continue;
+                }
+
+                snapShotArray.add(hitValue);
+
+                if (hitValue != null) {
+                    try {
+                        String[] parts = hitValue.split("\\|");
+                        Date date = dateFormat.parse(parts[0]);
+                        float gForce = Float.parseFloat(parts[1]);
+                        String direction = parts[2];
+
+                        direction = direction.replaceAll("Hit from ", "");
+
+                        hitCountArrayList.add(direction + "|" + gForce);
+
+                        if (date != null) {
+                            long hitTime = date.getTime();
+
+                            // For the last week graph
+                            if (hitTime > oneWeekAgo && isSameDate(finalLastDataDate, date)) {
+                                // Convert date to a float representing minutes since midnight
+                                calendar.setTime(date);
+                                float time = calendar.get(Calendar.HOUR_OF_DAY) * 60.0f + calendar.get(Calendar.MINUTE);
+
+                                lastWeekHitArraylist.add(time + "|" + gForce);
+                            }
+
+                            // For the 3 months graph
+                            if (hitTime > threeMonthsAgo) {
+                                // Find which week this hit belongs to
+                                long weeksSinceStart = (hitTime - threeMonthsAgo) / oneWeekMillis;
+                                long weekStartMillis = threeMonthsAgo + (weeksSinceStart * oneWeekMillis);
+
+                                // Increment the hit count for the corresponding week
+
+                                seasonHitArrayList.add(weekStartMillis + "|" + gForce);
+                            }
+                        }
+                    } catch (ParseException | NumberFormatException e) {
+                        Log.d("FirebaseData", "Error parsing hit value: " + hitValue);
+                    }
+                }
+            }
+            Log.d("FirebaseData", "Creating Graphs");
+        } else {
+            // Handle the case where the data does not exist or is empty
+            Log.d("FirebaseData", "No data recorded");
+        }
+    }
+
+    void loadingScreen(boolean loading) {
+        if (loading) {
+            progressBar.setVisibility(View.VISIBLE);
+            toolbar.setVisibility(View.GONE);
+            nestedScrollView.setVisibility(View.GONE);
+        } else {
+            progressBar.setVisibility(View.GONE);
+            toolbar.setVisibility(View.VISIBLE);
+            nestedScrollView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private boolean isSameDate(Date date1, Date date2) {
+        Calendar cal1 = Calendar.getInstance();
+        cal1.setTime(date1);
+        cal1.set(Calendar.HOUR_OF_DAY, 0);
+        cal1.set(Calendar.MINUTE, 0);
+        cal1.set(Calendar.SECOND, 0);
+        cal1.set(Calendar.MILLISECOND, 0);
+
+        Calendar cal2 = Calendar.getInstance();
+        cal2.setTime(date2);
+        cal2.set(Calendar.HOUR_OF_DAY, 0);
+        cal2.set(Calendar.MINUTE, 0);
+        cal2.set(Calendar.SECOND, 0);
+        cal2.set(Calendar.MILLISECOND, 0);
+
+        return cal1.equals(cal2);
+    }
+
 
     void setupToolBar() {
         toolbar.setTitle("");
@@ -284,12 +378,12 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         colors.add(Color.parseColor("#9467BD"));
         colors.add(Color.parseColor("#17BECF"));
         colors.add(Color.parseColor("#E377C2"));
-        colors.add(Color.parseColor("#7F7F7F"));
+        colors.add(Color.YELLOW);
         dataSet.setColors(colors);
 
         dataSet.setValueTextColor(Color.BLACK);
         dataSet.setValueTextSize(12f);
-
+        dataSet.setValueLineColor(Color.WHITE);
         dataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
         dataSet.setValueFormatter(new ValueFormatter() {
             @Override
@@ -321,6 +415,12 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
     public void createLastWeekGraph(float threshold1, float threshold2, String hitStrength) {
         ArrayList<Entry> entries = new ArrayList<>();
         HashMap<Float, Integer> lastWeekHitMap = new HashMap<>();
+
+        cardViewPlayerDataText2 = findViewById(R.id.cardViewPlayerDataText2);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        String formattedDate = dateFormat.format(finalLastDataDate);
+        cardViewPlayerDataText2.setText("Current Game Data" + "\n" + formattedDate);
+
 
         int hitCount = 0;
         for (String key : lastWeekHitArraylist) {
@@ -403,7 +503,6 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
             entries.add(new Entry(entry.getKey(), entry.getValue()));
         }
 
-
         // Sort the entries by the timestamp
         Collections.sort(entries, new EntryXComparator());
 
@@ -412,7 +511,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         lineDataSet.setColor(Color.WHITE);
         lineDataSet.setDrawValues(false);  // Don't draw values on the chart
         lineDataSet.setDrawFilled(true);  // Fill the area under the line
-        
+
         GradientDrawable gradientDrawable = new GradientDrawable();
         gradientDrawable.setShape(GradientDrawable.RECTANGLE);
         gradientDrawable.setColors(new int[]{backgroundColor.toArgb(), Color.TRANSPARENT});
@@ -421,7 +520,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
         // Create the LineData object with the dataset
         LineData lineData = new LineData(lineDataSet);
         lineChart2.setData(lineData);
-        lineChart2.getDescription().setEnabled(false);  // Disable the description
+        lineChart2.getDescription().setEnabled(false);
 
         // Customize the X-axis to show dates or week numbers
         XAxis xAxis = lineChart2.getXAxis();
@@ -440,7 +539,7 @@ public class PlayerDataOverviewActivity extends AppCompatActivity {
             public String getFormattedValue(float value) {
                 long millis = (long) value;
                 String formattedDate = dateFormat.format(new Date(millis));
-                Log.d("ChartDate", "Timestamp: " + millis + ", Date: " + formattedDate);
+//                Log.d("ChartDate", "Timestamp: " + millis + ", Date: " + formattedDate);
                 return formattedDate;
             }
         });

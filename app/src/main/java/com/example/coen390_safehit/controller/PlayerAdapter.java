@@ -15,6 +15,8 @@ import com.example.coen390_safehit.R;
 import com.example.coen390_safehit.model.Colors;
 import com.example.coen390_safehit.model.Player;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 import java.util.Random;
 
@@ -38,11 +40,12 @@ public class PlayerAdapter extends ArrayAdapter<Player> {
         TextView itemDetail = convertView.findViewById(R.id.itemDetail);
         TextView initals = convertView.findViewById(R.id.initials);
         TextView warning = convertView.findViewById(R.id.warning);
+        TextView lastHit = convertView.findViewById(R.id.lastHit);
 
         if (player != null) {
             if (player.getMac() != null) {
                 warning.setVisibility(View.GONE);
-                criticalHitListener = new CriticalHitListener(getContext(), player.getMac(), player.getFirstName() + " " + player.getLastName());
+                criticalHitListener = new CriticalHitListener(getContext(), player.getMac(), player.getFirstName() + " " + player.getLastName(), lastHit);
             } else {
                 warning.setVisibility(View.VISIBLE);
             }

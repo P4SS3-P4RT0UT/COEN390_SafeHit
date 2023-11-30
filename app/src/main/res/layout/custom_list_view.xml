@@ -42,17 +42,25 @@
             android:textColor="@color/white"
             android:textSize="18sp" />
 
+        <TextView
+            android:id="@+id/lastHit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+
 
     </LinearLayout>
 
     <TextView
         android:id="@+id/warning"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:background="@drawable/ic_warning"
         android:textStyle="bold"
         android:visibility="gone"
         android:textSize="24sp"
+        android:layout_marginEnd="20dp"
         android:textColor="@color/black"
         android:gravity="center" />
 </LinearLayout>
