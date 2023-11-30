@@ -60,6 +60,10 @@ public class SignUpInformation extends AppCompatActivity {
         setupSignUpButton();
     }
 
+    @Override
+    public void onBackPressed() {
+    }
+
     // To setup all possible user layouts
     public void setupUserLayouts() {
         // Layout of coach, player, and trainer
