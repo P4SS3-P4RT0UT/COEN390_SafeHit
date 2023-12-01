@@ -250,10 +250,16 @@ public class DatabaseHelper {
                 });
     }
 
-    public void updateCoach(String firstName, String lastName, String uid, String teamname) {
+    public void updateCoach(String firstName, String lastName, String uid, String teamname, String previousTeamName) {
         Map<String, String> person = new HashMap<>();
         person.put("FirstName", firstName);
         person.put("LastName", lastName);
+        String teamID = teamsList.get(previousTeamName);
+
+        if (teamsList.containsKey(teamname)) {
+            Toast.makeText(currentContext, "Team name already exists", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         db.collection("Person")
                 .document(uid)
@@ -263,7 +269,7 @@ public class DatabaseHelper {
                     @Override
                     public void onSuccess(Void unused) {
                         db.collection("Teams")
-                                .document(currentTeamID)
+                                .document(teamID)
                                 .update("TeamName", teamname)
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
@@ -830,51 +836,55 @@ public class DatabaseHelper {
         if (uid == null)
             return;
 
-        db.collection("Players")
+        // Delete from "Person" collection first
+        db.collection("Person")
                 .document(uid)
+                .delete()
+                .addOnCompleteListener(personTask -> {
+                    if (personTask.isSuccessful()) {
+                        // Person deleted successfully, now find and delete the player
+                        findAndDeletePlayer(uid);
+                    } else {
+                        handleDeletionError(personTask.getException());
+                    }
+                });
+    }
+
+    private void findAndDeletePlayer(String personId) {
+        // Assuming 'uid' is a field in the documents of the "Players" collection
+        db.collection("Players")
+                .whereEqualTo("PID", personId)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        String playerDocumentId = task.getResult().getId();
-                        String personDocumentId = task.getResult().getString("PID");
-
-
-                        db.collection("Players")
-                                .document(playerDocumentId)
-                                .delete()
-                                .addOnCompleteListener(playerTask -> {
-                                    if (playerTask.isSuccessful()) {
-                                        if (personDocumentId != null) {
-                                            db.collection("Person")
-                                                    .document(personDocumentId)
-                                                    .delete()
-                                                    .addOnCompleteListener(playerTask2 -> {
-                                                        if (playerTask2.isSuccessful()) {
-                                                            Intent intent = new Intent(currentContext, SignIn.class);
-                                                            currentContext.startActivity(intent);
-                                                            Toast.makeText(currentContext, "Person deleted successfully", Toast.LENGTH_SHORT).show();
-                                                        } else {
-                                                            // Handle the exception if deletion fails for the player document
-                                                            Toast.makeText(currentContext, "Failed to delete account: " + playerTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                                        }
-                                                    });
-                                        } else {
-                                            Intent intent = new Intent(currentContext, SignIn.class);
-                                            currentContext.startActivity(intent);
-                                        }
-                                        Toast.makeText(currentContext, "Player deleted successfully", Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        // Handle the exception if deletion fails for the player document
-                                        Toast.makeText(currentContext, "Failed to delete account: " + playerTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-
-
+                        for (DocumentSnapshot document : task.getResult()) {
+                            deletePlayer(document.getId());
+                        }
                     } else {
-                        // Handle the exception if fetching the player document fails
-                        Toast.makeText(currentContext, "Failed to delete account: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        handleDeletionError(task.getException());
                     }
                 });
+    }
+
+    private void deletePlayer(String playerDocumentId) {
+        db.collection("Players")
+                .document(playerDocumentId)
+                .delete()
+                .addOnCompleteListener(playerTask -> {
+                    if (playerTask.isSuccessful()) {
+                        Toast.makeText(currentContext, "Player deleted successfully", Toast.LENGTH_SHORT).show();
+                        // Redirect to SignIn or other appropriate action
+                        Intent intent = new Intent(currentContext, SignIn.class);
+                        currentContext.startActivity(intent);
+                    } else {
+                        handleDeletionError(playerTask.getException());
+                    }
+                });
+    }
+
+    private void handleDeletionError(Exception exception) {
+        // Log the error or handle it appropriately
+        Toast.makeText(currentContext, "Failed to delete account: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
     }
 
     // Method to delete a coach's team and remove coach ID from the team document

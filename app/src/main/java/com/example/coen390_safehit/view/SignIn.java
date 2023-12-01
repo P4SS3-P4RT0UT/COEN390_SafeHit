@@ -143,6 +143,7 @@ public class SignIn extends AppCompatActivity {
             @Override
             public void onEmpty() {
                 db.deleteUserFromFirebase();
+                signIn.setVisibility(View.VISIBLE);
                 Toast.makeText(SignIn.this, "Person not found in the database, please create a new account", Toast.LENGTH_SHORT).show();
             }
 

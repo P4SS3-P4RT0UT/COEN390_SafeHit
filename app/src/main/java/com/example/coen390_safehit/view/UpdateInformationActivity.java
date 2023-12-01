@@ -37,7 +37,7 @@ public class UpdateInformationActivity extends AppCompatActivity {
 
     static public ArrayAdapter<String> teamAdapter;
 
-    String position;
+    String team;
     String uid;
     String type;
 
@@ -49,6 +49,8 @@ public class UpdateInformationActivity extends AppCompatActivity {
 
         uid = getIntent().getStringExtra("pid");
         type = getIntent().getStringExtra("type");
+        team = getIntent().getStringExtra("teamName");
+
         firstName = findViewById(R.id.firstname_field);
         db.firstName = firstName;
         lastName = findViewById(R.id.lastname_field);
@@ -126,11 +128,51 @@ public class UpdateInformationActivity extends AppCompatActivity {
                 // Add the user to the database
                 switch (type) {
                     case "Coach":
-                        db.updateCoach(firstName.getText().toString(), lastName.getText().toString(), uid, teamName.getText().toString());
+                        if (firstName.getText().toString().trim().equals("")) {
+                            showToast("Please enter a first name");
+                            return;
+                        }
+
+                        if (lastName.getText().toString().trim().equals("")) {
+                            showToast("Please enter a last name");
+                            return;
+                        }
+
+                        if (teamName.getText().toString().trim().equals("")) {
+                            showToast("Please enter a team name");
+                            return;
+                        }
+
+                        db.updateCoach(firstName.getText().toString().trim(), lastName.getText().toString().trim(), uid, teamName.getText().toString().trim(), team);
                         break;
                     case "Player":
+                        if (teamDropdown.getSelectedItem().toString().equals("Select a team")) {
+                            showToast("Please select a team from the dropdown menu");
+                            return;
+                        }
+
+                        if (firstName.getText().toString().trim().equals("")) {
+                            showToast("Please enter a first name");
+                            return;
+                        }
+
+                        if (lastName.getText().toString().trim().equals("")) {
+                            showToast("Please enter a last name");
+                            return;
+                        }
+
+                        if (positionDropdown.getSelectedItem().toString().equals("Select a position")) {
+                            showToast("Please select a position from the dropdown menu");
+                            return;
+                        }
+
+                        if (TextUtils.isEmpty(number.getText())) {
+                            showToast("Please enter a number");
+                            return;
+                        }
                         db.teamsList.get(teamDropdown.getSelectedItem().toString());
-                        db.updatePerson(firstName.getText().toString(), lastName.getText().toString(), uid);
+                        db.updatePerson(firstName.getText().toString().trim(), lastName.getText().toString().trim(), uid);
+
                         db.updatePlayer(number.getText().toString(), positionDropdown.getSelectedItem().toString(), db.teamsList.get(teamDropdown.getSelectedItem().toString()), uid);
                         break;
                     case "Trainer":
@@ -198,7 +240,7 @@ public class UpdateInformationActivity extends AppCompatActivity {
     public void enableCoachReservedFields() {
         // To enter team name
         teamName = findViewById(R.id.teamname_field);
-        teamName.setText(DatabaseHelper.currentTeamName);
+        teamName.setText(team);
     }
 
     // To setup the dropdown for a player's position (players only)

@@ -122,7 +122,7 @@ public class CoachProfileActivity extends AppCompatActivity {
     }
 
     private void loadPlayers() {
-        if(playerslist.size()>0) {
+        if (playerslist.size() > 0) {
             playerAdapter.clear();
             teamAdapter.notifyDataSetChanged();
         }
@@ -243,6 +243,7 @@ public class CoachProfileActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
         intent.putExtra("pid", coachID);
         intent.putExtra("type", "Coach");
+        intent.putExtra("teamName", currentTeamName);
         startActivity(intent);
     }
 

@@ -34,6 +34,7 @@ public class SettingsActivity extends AppCompatActivity {
     // Person id to identify user
     private static String uid;
     private String type;
+    private String team;
     // Toolbar for back navigation
     private Toolbar toolbar;
 
@@ -54,12 +55,13 @@ public class SettingsActivity extends AppCompatActivity {
         // Fetch the id from the previous activity
         uid = getIntent().getStringExtra("pid");
         type = getIntent().getStringExtra("type");
+        team = getIntent().getStringExtra("teamName");
+
         scan = findViewById(R.id.scan);
         thresholdButton = findViewById(R.id.thresholdButton);
         thresholdSeekBar = findViewById(R.id.thresholdBar);
         thresholdValue = findViewById(R.id.thresholdValue);
         thresholdText = findViewById(R.id.textView3);
-
 
 
         boolean changed = false;
@@ -189,6 +191,7 @@ public class SettingsActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), UpdateInformationActivity.class);
         intent.putExtra("pid", uid);
         intent.putExtra("type", type);
+        intent.putExtra("teamName", team);
         startActivity(intent);
     }
 
