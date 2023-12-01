@@ -61,14 +61,18 @@ public class PlayerProfileActivity extends AppCompatActivity {
                 QRCodeScanner.onAttachDeviceClicked(playerID, context);
             });
         } else {
-            dataButton.setText("View Impacts Data");
-
-            dataButton.setOnClickListener(view -> {
-                Intent intent = new Intent(context, PlayerDataOverviewActivity.class);
-                intent.putExtra("fn", playerName.getText().toString());
-                context.startActivity(intent);
-            });
+            showImpactButton(context);
         }
+    }
+
+    public static void showImpactButton(Context context) {
+        dataButton.setText("View Impacts Data");
+
+        dataButton.setOnClickListener(view -> {
+            Intent intent = new Intent(context, PlayerDataOverviewActivity.class);
+            intent.putExtra("fn", playerName.getText().toString());
+            context.startActivity(intent);
+        });
     }
 
 

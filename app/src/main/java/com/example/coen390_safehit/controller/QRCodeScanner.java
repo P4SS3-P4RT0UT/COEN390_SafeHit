@@ -26,7 +26,7 @@ public class QRCodeScanner {
                             Player player = new Player();
                             player.setPid(id);
                             player.setMac(rawValue);
-                            PlayerProfileActivity.updateButton(context);
+                            PlayerProfileActivity.showImpactButton(context);
 
                         })
                 .addOnCanceledListener(
