@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">COEN390_SafeHit</string>
+    <string name="app_name">SafeHit</string>
     <string name="sign_up">Sign up</string>
     <string name="email">Email</string>
     <string name="password">Password</string>

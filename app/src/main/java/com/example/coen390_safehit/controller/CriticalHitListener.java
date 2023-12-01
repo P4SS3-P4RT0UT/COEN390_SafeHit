@@ -66,13 +66,13 @@ public class CriticalHitListener {
                                 long timeOfHit = hitDate.getTime();
 
                                 // Check if the hit was recorded today and within the last 5 minutes
-                                lastHit.setText("Last hit: " + hit[1] + " " + sdf.format(hitDate).split("@")[1]);
+                                lastHit.setText("Last hit: " + hit[1] + " (" + sdf.format(hitDate).split("@")[1] + ", " + sdf.format(hitDate).split("@")[0] + ")");
 
                                 if (isToday(hitDate) && (currentTime - timeOfHit <= 300000) && Double.parseDouble(hit[1]) > threshold) {
                                     // Send a notification to the coach
                                     lastHit.setTextColor(Color.YELLOW);
-                                    sendNotificationToCoach(DatabaseHelper.macAddress, playerName.toUpperCase() + ": Hard hit of " + hit[1] + " g detected", sdf.format(hitDate));
-
+                                    sendNotificationToCoach(DatabaseHelper.macAddress, playerName.toUpperCase() + ": Critical hit of " + hit[1] + " G detected", sdf.format(hitDate));
+                                    Log.d("FIREBASE REAL-TIME EVENT DETECTED", "Critical hit of " + hitValue + " G detected, sending notification to coach...");
                                     break;
                                 } else {
                                     lastHit.setTextColor(Color.WHITE);
@@ -80,7 +80,7 @@ public class CriticalHitListener {
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
-                            Log.d("FIREBASE REAL-TIME EVENT DETECTED", "Critical hit of " + hitValue + " g detected, sending notification to coach...");
+
                         }
                     }
                 } else {
@@ -110,16 +110,21 @@ public class CriticalHitListener {
 
     private void sendNotificationToCoach(String userId, String message, String timeStamp) {
         // Check for notification permission before attempting to send a notification
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Coach Channel";
+            String description = "Channel for Coach Notifications";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("COACH_CHANNEL", name, importance);
+            channel.setDescription(description);
+
+            // Get the NotificationManager using context
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
         }
 
-        // Proceed with creating and sending the notification
-        // Create a notification channel (for Android Oreo and above)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // ... existing channel creation code ...
+
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            return;
         }
 
         // Generate a unique notification ID
@@ -129,9 +134,8 @@ public class CriticalHitListener {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle("Critical Hit at " + timeStamp)
                 .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                // Set a small icon for the notification
-                .setSmallIcon(R.drawable.ic_check); // replace "ic_notification" with the name of your icon
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setSmallIcon(R.drawable.applogo);
 
         // Send the notification to the user
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);

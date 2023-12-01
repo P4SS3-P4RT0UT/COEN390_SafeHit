@@ -28,17 +28,17 @@ public class SplashScreenActivity extends AppCompatActivity {
                 mAuth = FirebaseAuth.getInstance();
                 if (sharedPreferences.getString("remember", "").equals("true")) {
                     signIn(sharedPreferences.getString("email", ""), sharedPreferences.getString("password", ""), true);
+                } else {
+                    Intent intent = new Intent(SplashScreenActivity.this, SignIn.class);
+                    startActivity(intent);
+                    finish();
                 }
-                else{
-                        Intent intent = new Intent(SplashScreenActivity.this, SignIn.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                }
+            }
 
 
-        },2000);
+        }, 2000);
     }
+
     void signIn(String emailText, String passwordText, boolean remembered) {
         mAuth.signInWithEmailAndPassword(emailText, passwordText)
                 .addOnCompleteListener(this, task -> {
@@ -49,6 +49,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                     }
                 });
     }
+
     void checkDatabase(String emailText) {
         DatabaseHelper db = DatabaseHelper.getInstance(this);
         db.getPersonFromEmail(emailText, new DatabaseHelper.FetchCallback() {
@@ -59,19 +60,26 @@ public class SplashScreenActivity extends AppCompatActivity {
                 else if (DatabaseHelper.personType.equals("Player"))
                     goToPlayerProfile();
             }
+
+            @Override
+            public void onEmpty() {
+
+            }
+
             @Override
             public void onError(Exception e) {
                 Toast.makeText(SplashScreenActivity.this, "Person not found in the database", Toast.LENGTH_SHORT).show();
             }
         });
     }
-            void goToCoachProfile() {
-                Intent coachProfile = new Intent(getApplicationContext(), CoachProfileActivity.class);
-                startActivity(coachProfile);
-            }
 
-            void goToPlayerProfile() {
-                Intent playerProfile = new Intent(getApplicationContext(), PlayerProfileActivity.class);
-                startActivity(playerProfile);
-            }
+    void goToCoachProfile() {
+        Intent coachProfile = new Intent(getApplicationContext(), CoachProfileActivity.class);
+        startActivity(coachProfile);
+    }
+
+    void goToPlayerProfile() {
+        Intent playerProfile = new Intent(getApplicationContext(), PlayerProfileActivity.class);
+        startActivity(playerProfile);
+    }
 }
