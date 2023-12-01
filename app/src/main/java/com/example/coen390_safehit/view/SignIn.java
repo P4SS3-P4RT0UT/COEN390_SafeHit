@@ -40,6 +40,10 @@ public class SignIn extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         SharedPreferences sharedPreferences = getSharedPreferences("checkbox", MODE_PRIVATE);

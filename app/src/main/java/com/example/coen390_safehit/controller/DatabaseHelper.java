@@ -827,6 +827,9 @@ public class DatabaseHelper {
     }
 
     private void deletePlayerDocument(String uid) {
+        if (uid == null)
+            return;
+
         db.collection("Players")
                 .document(uid)
                 .get()
@@ -835,23 +838,30 @@ public class DatabaseHelper {
                         String playerDocumentId = task.getResult().getId();
                         String personDocumentId = task.getResult().getString("PID");
 
+
                         db.collection("Players")
                                 .document(playerDocumentId)
                                 .delete()
                                 .addOnCompleteListener(playerTask -> {
                                     if (playerTask.isSuccessful()) {
-                                        db.collection("Person")
-                                                .document(personDocumentId)
-                                                .delete()
-                                                .addOnCompleteListener(playerTask2 -> {
-                                                    if (playerTask2.isSuccessful()) {
-
-                                                        Toast.makeText(currentContext, "Person deleted successfully", Toast.LENGTH_SHORT).show();
-                                                    } else {
-                                                        // Handle the exception if deletion fails for the player document
-                                                        Toast.makeText(currentContext, "Failed to delete account: " + playerTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                                    }
-                                                });
+                                        if (personDocumentId != null) {
+                                            db.collection("Person")
+                                                    .document(personDocumentId)
+                                                    .delete()
+                                                    .addOnCompleteListener(playerTask2 -> {
+                                                        if (playerTask2.isSuccessful()) {
+                                                            Intent intent = new Intent(currentContext, SignIn.class);
+                                                            currentContext.startActivity(intent);
+                                                            Toast.makeText(currentContext, "Person deleted successfully", Toast.LENGTH_SHORT).show();
+                                                        } else {
+                                                            // Handle the exception if deletion fails for the player document
+                                                            Toast.makeText(currentContext, "Failed to delete account: " + playerTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    });
+                                        } else {
+                                            Intent intent = new Intent(currentContext, SignIn.class);
+                                            currentContext.startActivity(intent);
+                                        }
                                         Toast.makeText(currentContext, "Player deleted successfully", Toast.LENGTH_SHORT).show();
                                     } else {
                                         // Handle the exception if deletion fails for the player document
