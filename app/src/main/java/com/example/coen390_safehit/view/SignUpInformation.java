@@ -135,14 +135,14 @@ public class SignUpInformation extends AppCompatActivity {
                 // Add the user to the database
                 switch (currentType) {
                     case "Coach":
-                        db.addCoach(firstName.getText().toString(), lastName.getText().toString(), teamName.getText().toString());
+                        db.addCoach(firstName.getText().toString().trim(), lastName.getText().toString().trim(), teamName.getText().toString().trim());
                         break;
                     case "Player":
                         db.teamsList.get(teamDropdown.getSelectedItem().toString());
-                        db.addPlayer(firstName.getText().toString(), lastName.getText().toString(), positionDropdown.getSelectedItem().toString(), number.getText().toString(), db.teamsList.get(teamDropdown.getSelectedItem().toString()));
+                        db.addPlayer(firstName.getText().toString().trim(), lastName.getText().toString().trim(), positionDropdown.getSelectedItem().toString(), number.getText().toString().trim(), db.teamsList.get(teamDropdown.getSelectedItem().toString()));
                         break;
                     case "Trainer":
-                        db.addTrainer(firstName.getText().toString(), lastName.getText().toString(), db.teamsList.get(teamName.getText().toString()));
+                        db.addTrainer(firstName.getText().toString().trim(), lastName.getText().toString().trim(), db.teamsList.get(teamName.getText().toString()));
                         break;
                     default:
                         progressBar.setVisibility(View.GONE);
@@ -159,24 +159,29 @@ public class SignUpInformation extends AppCompatActivity {
     // To check if all user inputs are valid
     public boolean validUserInput() {
         // For all user types, check first name, last name, and user type
-        if (TextUtils.isEmpty(firstName.getText()) || TextUtils.isEmpty(lastName.getText()) || TextUtils.isEmpty(currentType)) {
-            showToast("Please fill all required fields");
+        if (TextUtils.isEmpty(firstName.getText()) || firstName.getText().toString().trim().equals("")) {
+            showToast("Please enter your first name");
+            return false;
+        } else if (TextUtils.isEmpty(lastName.getText()) || lastName.getText().toString().trim().equals("")) {
+            showToast("Please enter your last name");
+            return false;
+        } else if (currentType.equals("Select Type")) {
+            showToast("Please select a user type");
             return false;
         }
         switch (currentType) {
             case "Coach":
-                // Check for team name
-                if (TextUtils.isEmpty(teamName.getText())) {
+                if (TextUtils.isEmpty(teamName.getText()) || teamName.getText().toString().trim().equals("")) {
                     showToast("Please enter a team name");
                     return false;
                 }
                 break;
             case "Player":
                 // Check for team name, position, and number
-                if (TextUtils.isEmpty(teamDropdown.getSelectedItem().toString()) || TextUtils.isEmpty(number.getText())) {
-                    showToast("Please fill all required fields");
+                if (TextUtils.isEmpty(number.getText())) {
+                    showToast("Please enter a number");
                     return false;
-                } else if (teamDropdown.getSelectedItem().toString().equals("Select a team")) {
+                } else if (teamDropdown.getSelectedItem().toString().equals("Select a team") || TextUtils.isEmpty(teamDropdown.getSelectedItem().toString())) {
                     showToast("Please select a team");
                     return false;
                 } else if (TextUtils.isEmpty(positionDropdown.getSelectedItem().toString()) || positionDropdown.getSelectedItem().toString().equals("Select a position")) {
